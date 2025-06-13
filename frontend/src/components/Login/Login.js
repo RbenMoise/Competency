@@ -16,7 +16,7 @@ export default function Login() {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "https://nockcompetency-qnwln.ondigitalocean.app/api/auth/login",
+        `${process.env.REACT_APP_API_URL}/api/auth/login`,
         // "http://localhost:4000/api/auth/login",
         form,
         {

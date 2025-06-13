@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const ScoreSubmission = require("../models/scoreSubmittion");
-const Notification = require("../models/notification");
+const Notification = require("../models/Notification");
 
 router.post("/scores", async (req, res) => {
   const user = req.session.user;

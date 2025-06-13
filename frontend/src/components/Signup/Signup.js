@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import API from "../../api";
 import { useNavigate, Link } from "react-router-dom";
 import "./Signup.css";
+import axios from "axios";
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -20,7 +21,7 @@ export default function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/auth/signup", form);
+      await axios.post(`${process.env.REACT_APP_API_URL}/auth/signup`, form);
       alert("Signup successful. Please login.");
       navigate("/login");
     } catch (err) {

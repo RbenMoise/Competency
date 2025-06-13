@@ -36,9 +36,12 @@ export default function ModernSpiderChart() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/auth/me", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/auth/me`,
+          {
+            withCredentials: true,
+          }
+        );
         console.log("API Response:", res.data);
         const userData = res.data.user;
         setUser(userData);
@@ -146,7 +149,7 @@ export default function ModernSpiderChart() {
       const submissionId = user.submissions[0]._id;
       const newCommitted = !committed;
       await axios.post(
-        `http://localhost:4000/scores/${submissionId}/commit`,
+        `${process.env.REACT_APP_API_URL}/scores/${submissionId}/commit`,
         { committed: newCommitted },
         { withCredentials: true }
       );
@@ -167,7 +170,7 @@ export default function ModernSpiderChart() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:4000/api/auth/logout",
+        `${process.env.REACT_APP_API_URL}/api/auth/logout`,
         {},
         { withCredentials: true }
       );

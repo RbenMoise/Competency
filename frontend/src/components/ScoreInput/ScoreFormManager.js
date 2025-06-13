@@ -51,7 +51,7 @@ export default function ScoreFormManager({
 
     try {
       const response = await axios.post(
-        "http://localhost:4000/api/scores",
+        `${process.env.REACT_APP_API_URL}/api/scores`,
         { current: currentScores, projected: projectedScores },
         { withCredentials: true }
       );

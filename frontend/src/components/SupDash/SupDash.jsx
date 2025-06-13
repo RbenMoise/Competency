@@ -31,7 +31,7 @@ export default function SupDash() {
   const markAsRead = async (notificationId) => {
     try {
       await axios.patch(
-        `http://localhost:4000/api/notifications/${notificationId}/read`,
+        `${process.env.REACT_APP_API_URL}/api/notifications/${notificationId}/read`,
         {},
         {
           withCredentials: true,
@@ -48,9 +48,12 @@ export default function SupDash() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/auth/me", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/auth/me`,
+          {
+            withCredentials: true,
+          }
+        );
         const userData = res.data.user;
         setUser(userData);
 
@@ -59,9 +62,12 @@ export default function SupDash() {
           return;
         }
 
-        const teamRes = await axios.get("http://localhost:4000/api/team", {
-          withCredentials: true,
-        });
+        const teamRes = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/team`,
+          {
+            withCredentials: true,
+          }
+        );
         setSubmissions(
           teamRes.data.users.flatMap((user) =>
             user.submissions.map((sub) => ({

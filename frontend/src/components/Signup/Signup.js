@@ -22,6 +22,7 @@ export default function Signup() {
     e.preventDefault();
     try {
       await axios.post(
+        // api
         `${process.env.REACT_APP_API_URL}/api/auth/signup`,
         form
       );

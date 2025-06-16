@@ -21,7 +21,10 @@ export default function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/signup`, form);
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/signup`,
+        form
+      );
       alert("Signup successful. Please login.");
       navigate("/login");
     } catch (err) {
@@ -33,7 +36,7 @@ export default function Signup() {
     <div className="signup-container">
       <div className="signup-card">
         <div className="signup-header">
-          <h2>Create Your Account</h2>
+          <h2>Create Your Account.</h2>
           <div className="accent-line"></div>
         </div>
 

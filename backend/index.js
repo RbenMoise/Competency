@@ -1,17 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 require("dotenv").config();
 const scoreRoutes = require("./routes/scoreRoute");
-const session = require("express-session");
 const path = require("path");
 
 const app = express();
 
 app.use(
   cors({
-    origin: "https://nockcompetency-qnwln.ondigitalocean.app",
-    // origin: "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://nockcompetency-qnwln.ondigitalocean.app",
+      "https://nockcompetency-qad9e.ondigitalocean.app",
+    ],
     credentials: true,
   })
 );
@@ -20,22 +24,44 @@ app.use(express.json());
 
 app.use(
   session({
-    secret: "your-secret",
+    secret: process.env.SESSION_SECRET || "your-secret",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      collectionName: "sessions",
+      ttl: 12 * 60 * 60, // 12 hours
+    }),
+    cookie: {
+      secure: false, // Set to false for local development
+      httpOnly: true,
+      sameSite: "lax", // lax for local, none for production
+      maxAge: 12 * 60 * 60 * 1000, // 12 hours
+      path: "/",
+    },
   })
 );
 
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  })
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.error("MongoDB error:", err));
 
+// Debug middleware to log session data
+app.use((req, res, next) => {
+  console.log("Request URL:", req.url);
+  console.log("Session ID:", req.sessionID);
+  console.log("Session user:", req.session.user);
+  next();
+});
+
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api", scoreRoutes);
-
-// Debug middleware to log all incoming requests
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, "./build")));

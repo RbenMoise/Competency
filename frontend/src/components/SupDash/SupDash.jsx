@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import LOGO from "../../assets/nock j.png";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./SupDash.css";
+import LoadingSpinner from "./Loading Spinner";
 
 export default function SupDash() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -17,8 +18,10 @@ export default function SupDash() {
   const [submissions, setSubmissions] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -31,11 +34,14 @@ export default function SupDash() {
   const markAsRead = async (notificationId) => {
     try {
       await axios.patch(
-        `${process.env.REACT_APP_API_URL}/api/notifications/${notificationId}/read`,
+        `${
+          process.env.REACT_APP_API_URL
+            ? process.env.REACT_APP_API_URL
+            : "http://localhost:4000"
+        }/api/notifications/${notificationId}/read`,
+        // `http://localhost:4000/api/notifications/${notificationId}/read`,
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
       setNotifications(
         notifications.filter((notif) => notif._id !== notificationId)
@@ -47,26 +53,36 @@ export default function SupDash() {
 
   useEffect(() => {
     const fetchUserData = async () => {
+      setIsLoading(true);
       try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/auth/me`,
-          {
-            withCredentials: true,
-          }
+        // Fetch user data first
+        const userRes = await axios.get(
+          `${
+            process.env.REACT_APP_API_URL
+              ? process.env.REACT_APP_API_URL
+              : "http://localhost:4000"
+          }/api/auth/me`,
+          // "http://localhost:4000/api/auth/me",
+          { withCredentials: true }
         );
-        const userData = res.data.user;
+        const userData = userRes.data.user;
         setUser(userData);
 
         if (userData.role !== "supervisor") {
           setError("Access restricted to supervisors");
+          setIsLoading(false);
           return;
         }
 
+        // Fetch team data only if supervisor
         const teamRes = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/team`,
-          {
-            withCredentials: true,
-          }
+          `${
+            process.env.REACT_APP_API_URL
+              ? process.env.REACT_APP_API_URL
+              : "http://localhost:4000"
+          }/api/team`,
+          // "http://localhost:4000/api/team",
+          { withCredentials: true }
         );
         setSubmissions(
           teamRes.data.users.flatMap((user) =>
@@ -78,16 +94,17 @@ export default function SupDash() {
         );
         setSummary(teamRes.data.summary);
         setNotifications(teamRes.data.notifications || []);
+        setIsLoading(false);
       } catch (err) {
         console.error(
           "Error fetching data:",
           err.response?.data || err.message
         );
-        setError(
-          err.response?.data?.message || "Failed to load dashboard data"
-        );
-        if (err.response?.status === 401) {
-          window.location.href = "/login";
+        setError(err.response?.data?.error || "Failed to load dashboard data");
+        setIsLoading(false);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          localStorage.removeItem("user");
+          navigate("/login");
         }
       }
     };
@@ -108,7 +125,11 @@ export default function SupDash() {
       clearInterval(interval);
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [navigate]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   if (error) {
     return (
@@ -125,32 +146,22 @@ export default function SupDash() {
   }
 
   if (!user) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner">
-          <div className="spinner-sector spinner-sector-primary"></div>
-          <div className="spinner-sector spinner-sector-secondary"></div>
-          <div className="spinner-sector spinner-sector-tertiary"></div>
-        </div>
-        <div className="loading-content">
-          <img src={LOGO} alt="NOCK Logo" className="loading-logo" />
-          <h2 className="loading-text">Loading Dashboard Data</h2>
-          <p className="loading-subtext">Please wait while we prepare</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:4000/api/auth/logout",
+        `${
+          process.env.REACT_APP_API_URL
+            ? process.env.REACT_APP_API_URL
+            : "http://localhost:4000"
+        }/api/auth/logout`,
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
-      window.location.href = "/login"; // or use navigate() from react-router
+      localStorage.removeItem("user");
+      navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
     }
@@ -284,7 +295,7 @@ export default function SupDash() {
               <ul className="review-list">
                 {pendingReviews.map((sub) => (
                   <li key={sub._id} className="review-item">
-                    {sub.submitter.name}- Submitted at{" "}
+                    {sub.submitter.name} - Submitted at{" "}
                     {new Date(sub.submittedAt).toLocaleDateString()}
                   </li>
                 ))}

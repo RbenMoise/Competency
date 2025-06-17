@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import API from "../../api";
+// import API from "../../api";
 import { useNavigate, Link } from "react-router-dom";
 import "./Signup.css";
 import axios from "axios";

@@ -1,5 +1,4 @@
 const User = require("../models/User");
-const jwt = require("jsonwebtoken");
 
 exports.signup = async (req, res) => {
   const { name, email, password, role, occupation } = req.body;
@@ -17,8 +16,29 @@ exports.signup = async (req, res) => {
       occupation,
     });
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Store user in session
+    req.session.user = {
+      _id: newUser._id.toString(),
+      name: newUser.name,
+      role: newUser.role,
+      occupation: newUser.occupation,
+    };
+
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error during signup:", err);
+        return res.status(500).json({ message: "Session error" });
+      }
+      console.log(
+        "Session set after signup:",
+        req.session.user,
+        "Session ID:",
+        req.sessionID
+      );
+      res.status(201).json({ message: "User registered successfully" });
+    });
   } catch (err) {
+    console.error("Signup error:", err);
     res.status(500).json({ message: "Signup error", error: err.message });
   }
 };
@@ -35,7 +55,7 @@ exports.login = async (req, res) => {
 
     // Store user in session
     req.session.user = {
-      _id: user._id.toString(), // Ensure string ID
+      _id: user._id.toString(),
       name: user.name,
       role: user.role,
       occupation: user.occupation,
@@ -44,11 +64,11 @@ exports.login = async (req, res) => {
     // Save session explicitly
     req.session.save((err) => {
       if (err) {
-        console.error("Session save error:", err);
+        console.error("Session save error during login:", err);
         return res.status(500).json({ message: "Session error" });
       }
       console.log(
-        "Session set:",
+        "Session set after login:",
         req.session.user,
         "Session ID:",
         req.sessionID
@@ -80,8 +100,8 @@ exports.logout = (req, res) => {
     res.clearCookie("connect.sid", {
       path: "/",
       httpOnly: true,
-      sameSite: "lax",
-      secure: false, // set to true if using HTTPS
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
     });
     return res.json({ message: "Logged out successfully" });
   });

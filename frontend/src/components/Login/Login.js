@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-// import API from "../../api";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
 import axios from "axios";
+import LoadingSpinner from "../SupDash/Loading Spinner";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -14,25 +15,36 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/login`,
+        `${
+          process.env.REACT_APP_API_URL
+            ? process.env.REACT_APP_API_URL
+            : "http://localhost:4000"
+        }/api/auth/login`,
         // "http://localhost:4000/api/auth/login",
         form,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
-      console.log("Login response:", res.data); // Debug
+      console.log("Login response:", res.data);
       localStorage.setItem("user", JSON.stringify(res.data.user));
+      // Wait to ensure session sync
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       const role = res.data.user.role;
       if (role === "employee") navigate("/employee");
       else navigate("/supervisor");
     } catch (err) {
-      console.error("Login error:", err.response?.data);
-      alert(err.response?.data?.message || "Login error");
+      console.error("Login error:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="login-container">
@@ -51,6 +63,7 @@ export default function Login() {
               onChange={handleChange}
               required
               className="form-input"
+              disabled={isLoading}
             />
             <label className="input-label">Email Address</label>
             <div className="input-highlight"></div>
@@ -63,13 +76,20 @@ export default function Login() {
               onChange={handleChange}
               required
               className="form-input"
+              disabled={isLoading}
             />
             <label className="input-label">Password</label>
             <div className="input-highlight"></div>
           </div>
-          <button type="submit" className="login-button">
-            <span>Continue</span>
-            <div className="button-icon">→</div>
+          <button type="submit" className="login-button" disabled={isLoading}>
+            {isLoading ? (
+              <span>Logging in...</span>
+            ) : (
+              <>
+                <span>Continue</span>
+                <div className="button-icon">→</div>
+              </>
+            )}
           </button>
           <div className="signup-redirect">
             Don't have an account?{" "}

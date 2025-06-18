@@ -28,3 +28,7 @@ npm-debug.log*
 frontend/public/*.dmg
 frontend/public/*.zip
 frontend/public/*.exe
+# .gitignore
+node_modules/
+.cache/
+*.dmg

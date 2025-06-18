@@ -1,0 +1,30 @@
+node_modules
+.env
+.DS_Store
+*.log
+
+
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+
+# OS & Editor files
+.DS_Store
+.env
+.vscode/
+
+# Build files
+dist/
+# build/
+
+# Cache
+.cache/
+npm-debug.log*
+
+# Frontend build artifacts
+frontend/public/*.dmg
+frontend/public/*.zip
+frontend/public/*.exe

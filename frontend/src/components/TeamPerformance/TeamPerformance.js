@@ -57,11 +57,7 @@ export default function TeamPerformance() {
           teamRes.data.users.flatMap((user) =>
             user.submissions.map((sub) => ({
               ...sub,
-              submitter: {
-                name: user.name,
-                email: user.email,
-                occupation: user.occupation,
-              },
+              submitter: { name: user.name, occupation: user.occupation },
             }))
           )
         );
@@ -120,21 +116,39 @@ export default function TeamPerformance() {
       ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`
       : nameParts[0][0];
 
-  // Get unique disciplines
+  // Define allowed disciplines
+  const allowedDisciplines = [
+    "Geology",
+    "Geophysics",
+    "Geochemistry",
+    "Petroleum Engineering",
+    "Project Management",
+    "Renewable Energy",
+    "Field Work",
+    "Reporting",
+  ];
+
+  // Get disciplines, filtering out invalid ones
   const disciplines = [
-    ...new Set(submissions.flatMap((sub) => Object.keys(sub.current || {}))),
+    ...new Set(
+      submissions
+        .flatMap((sub) => Object.keys(sub.current || {}))
+        .filter((disc) => allowedDisciplines.includes(disc))
+    ),
   ].sort();
 
   // Calculate totals and averages
   const employeeData = submissions.reduce((acc, sub) => {
-    const { name, email } = sub.submitter;
-    const key = `${name}-${email}`;
+    const { name } = sub.submitter;
+    const key = name; // Use name as unique key
     if (!acc[key]) {
-      acc[key] = { name, email, scores: {}, total: 0 };
+      acc[key] = { name, scores: {}, total: 0 };
     }
     Object.entries(sub.current || {}).forEach(([disc, score]) => {
-      acc[key].scores[disc] = score;
-      acc[key].total += score;
+      if (allowedDisciplines.includes(disc)) {
+        acc[key].scores[disc] = score;
+        acc[key].total += score;
+      }
     });
     return acc;
   }, {});
@@ -219,7 +233,6 @@ export default function TeamPerformance() {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Email</th>
               {disciplines.map((disc) => (
                 <th key={disc}>{disc}</th>
               ))}
@@ -228,9 +241,8 @@ export default function TeamPerformance() {
           </thead>
           <tbody>
             {Object.values(employeeData).map((emp) => (
-              <tr key={emp.email}>
+              <tr key={emp.name}>
                 <td>{emp.name}</td>
-                <td>{emp.email}</td>
                 {disciplines.map((disc) => (
                   <td key={disc}>{emp.scores[disc] || "-"}</td>
                 ))}
@@ -240,7 +252,7 @@ export default function TeamPerformance() {
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan="2">
+              <td>
                 <strong>Average</strong>
               </td>
               {disciplines.map((disc) => (

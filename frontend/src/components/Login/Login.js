@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Login.css";
-import axios from "axios";
+// import axios from "axios";
 import LoadingSpinner from "../SupDash/Loading Spinner";
+import AuthContext from "../context/AuthContext";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -17,23 +19,15 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await axios.post(
-        `${
-          process.env.REACT_APP_API_URL
-            ? process.env.REACT_APP_API_URL
-            : "http://localhost:4000"
-        }/api/auth/login`,
-        // "http://localhost:4000/api/auth/login",
-        form,
-        { withCredentials: true }
-      );
-      console.log("Login response:", res.data);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      // Wait to ensure session sync
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const role = res.data.user.role;
-      if (role === "employee") navigate("/employee");
-      else navigate("/supervisor");
+      const user = await login(form);
+      console.log("Login response:", user);
+      if (user.role === "employee") {
+        navigate("/employee");
+      } else if (user.role === "supervisor") {
+        navigate("/supervisor");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);
       alert(err.response?.data?.message || "Login failed. Please try again.");
@@ -43,7 +37,7 @@ export default function Login() {
   };
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner message="Logging in..." />;
   }
 
   return (

@@ -29,9 +29,7 @@ export default function TeamPerformance() {
               ? process.env.REACT_APP_API_URL
               : "http://localhost:4000"
           }/api/auth/me`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
         const userData = userRes.data.user;
         setUser(userData);
@@ -49,9 +47,7 @@ export default function TeamPerformance() {
               ? process.env.REACT_APP_API_URL
               : "http://localhost:4000"
           }/api/team`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
         setSubmissions(
           teamRes.data.users.flatMap((user) =>
@@ -116,39 +112,21 @@ export default function TeamPerformance() {
       ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`
       : nameParts[0][0];
 
-  // Define allowed disciplines
-  const allowedDisciplines = [
-    "Geology",
-    "Geophysics",
-    "Geochemistry",
-    "Petroleum Engineering",
-    "Project Management",
-    "Renewable Energy",
-    "Field Work",
-    "Reporting",
-  ];
-
-  // Get disciplines, filtering out invalid ones
+  // Get disciplines
   const disciplines = [
-    ...new Set(
-      submissions
-        .flatMap((sub) => Object.keys(sub.current || {}))
-        .filter((disc) => allowedDisciplines.includes(disc))
-    ),
+    ...new Set(submissions.flatMap((sub) => Object.keys(sub.current || {}))),
   ].sort();
 
   // Calculate totals and averages
   const employeeData = submissions.reduce((acc, sub) => {
     const { name } = sub.submitter;
-    const key = name; // Use name as unique key
+    const key = name;
     if (!acc[key]) {
       acc[key] = { name, scores: {}, total: 0 };
     }
     Object.entries(sub.current || {}).forEach(([disc, score]) => {
-      if (allowedDisciplines.includes(disc)) {
-        acc[key].scores[disc] = score;
-        acc[key].total += score;
-      }
+      acc[key].scores[disc] = score;
+      acc[key].total += score;
     });
     return acc;
   }, {});
@@ -165,6 +143,16 @@ export default function TeamPerformance() {
         : "-";
     return acc;
   }, {});
+
+  // Calculate average of total scores
+  const totalScores = Object.values(employeeData).map((emp) => emp.total);
+  const averageTotalScore =
+    totalScores.length > 0
+      ? (
+          totalScores.reduce((sum, score) => sum + score, 0) /
+          totalScores.length
+        ).toFixed(2)
+      : "-";
 
   return (
     <div className="team-performance-container">
@@ -258,7 +246,7 @@ export default function TeamPerformance() {
               {disciplines.map((disc) => (
                 <td key={disc}>{disciplineAverages[disc]}</td>
               ))}
-              <td>-</td>
+              <td>{averageTotalScore}</td>
             </tr>
           </tfoot>
         </table>

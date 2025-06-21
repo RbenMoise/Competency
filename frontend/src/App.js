@@ -8,6 +8,7 @@ import SupervisorDashboard from "../src/components/SupervisorDashboard/Superviso
 import EmployeeAssessments from "../src/components/EmployeeAss/EmployeeAssessments";
 import SupDash from "../src/components/SupDash/SupDash";
 import StartUp from "../src/components/StartUp/StartUp";
+import TeamPerformance from "../src/components/TeamPerformance/TeamPerformance";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/supervisor" element={<SupervisorDashboard />} />
         <Route path="/employeeAssessments" element={<EmployeeAssessments />} />
         <Route path="/supDash" element={<SupDash />} />
+        <Route path="/teamPerformance" element={<TeamPerformance />} />
       </Routes>
     </Router>
   );

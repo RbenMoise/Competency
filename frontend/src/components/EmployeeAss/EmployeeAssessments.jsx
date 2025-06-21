@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import LOGO from "../../assets/nock j.png";
 import SupGuidelines from "../Guidelines/SupGuidelines";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./EmployeeAssessments.css";
+import LoadingSpinner from "../SupDash/Loading Spinner";
 
 export default function EmployeeAssessments() {
   function DashboardIcon() {
@@ -57,8 +58,10 @@ export default function EmployeeAssessments() {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [currentSubmission, setCurrentSubmission] = useState(null);
   const [supervisorAssessment, setSupervisorAssessment] = useState({});
-  const [modalMode, setModalMode] = useState("edit"); // "edit" for pending, "view" for approved/rejected
+  const [modalMode, setModalMode] = useState("edit");
+  const [isLoading, setIsLoading] = useState(true);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -66,9 +69,16 @@ export default function EmployeeAssessments() {
 
   const fetchSubmissions = async () => {
     try {
-      const teamRes = await axios.get("http://localhost:4000/api/team", {
-        withCredentials: true,
-      });
+      const teamRes = await axios.get(
+        `${
+          process.env.REACT_APP_API_URL
+            ? process.env.REACT_APP_API_URL
+            : "http://localhost:4000"
+        }/api/team`,
+        {
+          withCredentials: true,
+        }
+      );
       console.log("Fetched team data:", teamRes.data);
       setSubmissions(
         teamRes.data.users.flatMap((user) =>
@@ -85,44 +95,51 @@ export default function EmployeeAssessments() {
       );
       setSummary(teamRes.data.summary);
     } catch (err) {
-      console.error(
-        "Error fetching submissions:",
-        err.response?.data || err.message
-      );
-      setError(
-        err.response?.data?.message || "Failed to load data. Please try again."
-      );
+      console.error("Error fetching submissions:", err);
+      setError("Failed to load team data.");
     }
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const res = await axios.get("http://localhost:4000/api/auth/me", {
-          withCredentials: true,
-        });
-        const userData = res.data.user;
+        const userRes = await axios.get(
+          `${
+            process.env.REACT_APP_API_URL
+              ? process.env.REACT_APP_API_URL
+              : "http://localhost:4000"
+          }/api/auth/me`,
+          {
+            withCredentials: true,
+          }
+        );
+        const userData = userRes.data.user;
         console.log("Fetched user data:", userData);
         setUser(userData);
 
         if (userData.role !== "supervisor") {
           setError("Access restricted to supervisors");
+          setIsLoading(false);
           return;
         }
 
         await fetchSubmissions();
+        setIsLoading(false);
       } catch (err) {
         console.error(
           "Error fetching data:",
           err.response?.data || err.message
         );
         setError(err.response?.data?.message || "Failed to load data.");
-        if (err.response?.status === 401) {
-          window.location.href = "/login";
+        setIsLoading(false);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          localStorage.removeItem("user");
+          navigate("/login");
         }
       }
     };
-    fetchUserData();
+    fetchData();
 
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -131,7 +148,7 @@ export default function EmployeeAssessments() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [navigate]);
 
   const formatScores = (scores) => {
     if (!scores || typeof scores !== "object") return "No assessment";
@@ -160,7 +177,11 @@ export default function EmployeeAssessments() {
   const handleApproval = async () => {
     try {
       const res = await axios.patch(
-        `http://localhost:4000/api/scores/${currentSubmission._id}/approve`,
+        `${
+          process.env.REACT_APP_API_URL
+            ? process.env.REACT_APP_API_URL
+            : "http://localhost:4000"
+        }/api/scores/${currentSubmission._id}/approve`,
         { status: "approved", supervisorAssessment },
         { withCredentials: true }
       );
@@ -170,18 +191,19 @@ export default function EmployeeAssessments() {
       setCurrentSubmission(null);
       setSupervisorAssessment({});
     } catch (err) {
-      console.error(
-        "Error approving submission:",
-        err.response?.data || err.message
-      );
-      setError(err.response?.data?.message || "Failed to approve submission.");
+      console.error("Error approving submission:", err);
+      setError("Failed to approve submission.");
     }
   };
 
   const handleReject = async (submissionId, comments) => {
     try {
       const res = await axios.patch(
-        `http://localhost:4000/api/scores/${submissionId}/approve`,
+        `${
+          process.env.REACT_APP_API_URL
+            ? process.env.REACT_APP_API_URL
+            : "http://localhost:4000"
+        }/api/scores/${submissionId}/approve`,
         { status: "rejected", approvalComments: comments },
         { withCredentials: true }
       );
@@ -189,11 +211,8 @@ export default function EmployeeAssessments() {
       await fetchSubmissions();
       setRejectComments((prev) => ({ ...prev, [submissionId]: "" }));
     } catch (err) {
-      console.error(
-        "Error rejecting submission:",
-        err.response?.data || err.message
-      );
-      setError(err.response?.data?.message || "Failed to reject submission.");
+      console.error("Error rejecting submission:", err);
+      setError("Failed to reject submission.");
     }
   };
 
@@ -210,6 +229,10 @@ export default function EmployeeAssessments() {
             : false
         );
 
+  if (isLoading) {
+    return <LoadingSpinner message="Data is on the way..." />;
+  }
+
   if (error) {
     return (
       <div className="error-container">
@@ -225,20 +248,7 @@ export default function EmployeeAssessments() {
   }
 
   if (!user) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner">
-          <div className="spinner-sector spinner-sector-primary"></div>
-          <div className="spinner-sector spinner-sector-secondary"></div>
-          <div className="spinner-sector spinner-sector-tertiary"></div>
-        </div>
-        <div className="loading-content">
-          <img src={LOGO} alt="NOCK Logo" className="loading-logo" />
-          <h2 className="loading-text">Loading Assessment Data</h2>
-          <p className="loading-subtext">Please wait while we prepare</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Data is on the way..." />;
   }
 
   const nameParts = user.name.split(" ");
@@ -291,10 +301,12 @@ export default function EmployeeAssessments() {
       </div>
       <div className="assessments-content">
         <div className="action-card">
-          <button className="view-all-btn">
-            View Team Performance
-            <span className="arrow-icon">→</span>
-          </button>
+          <Link to="/teamPerformance">
+            <button className="view-all-btn">
+              View Team Performance
+              <span className="arrow-icon">→</span>
+            </button>
+          </Link>
         </div>
         <div className="filter-tabs">
           <div
@@ -336,11 +348,9 @@ export default function EmployeeAssessments() {
               <thead>
                 <tr>
                   <th>Name</th>
-                
                   <th>Position</th>
                   <th>Status</th>
                   <th>Submitted At</th>
-               
                   <th>Employee Assessment</th>
                   <th>Supervisor Assessment</th>
                   <th>Actions</th>
@@ -350,18 +360,15 @@ export default function EmployeeAssessments() {
                 {filteredSubmissions.map((submission) => (
                   <tr key={submission._id}>
                     <td>{submission.submitter.name}</td>
-                 
                     <td>{submission.submitter.occupation}</td>
-                   <td>
-                <span className={`status-badge ${submission.status.toLowerCase()}`}>
-                  {submission.status}
-                </span>
-              </td>
-                    
                     <td>
-  {new Date(submission.submittedAt).toLocaleString()}
-</td>
-
+                      <span
+                        className={`status-badge ${submission.status.toLowerCase()}`}
+                      >
+                        {submission.status}
+                      </span>
+                    </td>
+                    <td>{new Date(submission.submittedAt).toLocaleString()}</td>
                     <td>{formatScores(submission.current)}</td>
                     <td>{formatScores(submission.supervisorAssessment)}</td>
                     <td>
@@ -483,7 +490,6 @@ export default function EmployeeAssessments() {
                     )
                   )}
                 </tbody>
-                
               </table>
               {modalMode === "view" &&
                 currentSubmission.status === "rejected" && (
@@ -497,14 +503,15 @@ export default function EmployeeAssessments() {
                 )}
             </div>
             <div className="modal-actions">
-                        <button
-                          onClick={() => setShowPopup(true)}
-                          className="approve-btn"
-                        >
-                          Guidelines 
-                        </button>
-                        {showPopup && <SupGuidelines onClose={() => setShowPopup(false)} />}
-                 
+              <button
+                onClick={() => setShowPopup(true)}
+                className="approve-btn"
+              >
+                Guidelines
+              </button>
+              {showPopup && (
+                <SupGuidelines onClose={() => setShowPopup(false)} />
+              )}
               <button
                 className="cancel-btn"
                 onClick={() => setShowApprovalModal(false)}

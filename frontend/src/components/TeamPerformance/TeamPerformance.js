@@ -166,6 +166,10 @@ export default function TeamPerformance() {
           totalAverages.length
         ).toFixed(2)
       : "-";
+  const sumOfAverages =
+    totalAverages.length > 0
+      ? totalAverages.reduce((sum, avg) => sum + avg, 0).toFixed(2)
+      : "-";
 
   return (
     <div className="team-performance-container">
@@ -272,7 +276,7 @@ export default function TeamPerformance() {
                 <td key={disc}>{disciplineAverages[disc].sum}</td>
               ))}
               <td>{sumTotalScore}</td>
-              <td>-</td>
+              <td>{sumOfAverages}</td>
             </tr>
           </tfoot>
         </table>

@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import LOGO from "../../assets/nock j.png";
 import LoadingSpinner from "../SupDash/Loading Spinner";
+import AuthContext from "../context/AuthContext";
 import "./TeamPerformance.css";
 
 export default function TeamPerformance() {
-  const [user, setUser] = useState(null);
+  const { user } = useContext(AuthContext);
   const [submissions, setSubmissions] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,30 +23,15 @@ export default function TeamPerformance() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch user data first
-        const userRes = await axios.get(
-          `${
-            process.env.REACT_APP_API_URL
-              ? process.env.REACT_APP_API_URL
-              : "http://localhost:4000"
-          }/api/auth/me`,
-          { withCredentials: true }
-        );
-        const userData = userRes.data.user;
-        setUser(userData);
-
-        if (userData.role !== "supervisor") {
+        if (!user || user.role !== "supervisor") {
           setError("Access restricted to supervisors");
           setIsLoading(false);
           return;
         }
 
-        // Fetch team data
         const teamRes = await axios.get(
           `${
-            process.env.REACT_APP_API_URL
-              ? process.env.REACT_APP_API_URL
-              : "http://localhost:4000"
+            process.env.REACT_APP_API_URL || "http://localhost:4000"
           }/api/team`,
           { withCredentials: true }
         );
@@ -68,7 +54,6 @@ export default function TeamPerformance() {
         );
         setIsLoading(false);
         if (err.response?.status === 401 || err.response?.status === 403) {
-          localStorage.removeItem("user");
           navigate("/login");
         }
       }
@@ -82,7 +67,7 @@ export default function TeamPerformance() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [navigate]);
+  }, [navigate, user]);
 
   if (isLoading) {
     return <LoadingSpinner message="Data is on the way..." />;
@@ -112,39 +97,53 @@ export default function TeamPerformance() {
       ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`
       : nameParts[0][0];
 
-  // Get disciplines
   const disciplines = [
     ...new Set(submissions.flatMap((sub) => Object.keys(sub.current || {}))),
   ].sort();
 
-  // Calculate totals and averages
   const employeeData = submissions.reduce((acc, sub) => {
     const { name } = sub.submitter;
     const key = name;
-    if (!acc[key]) {
-      acc[key] = { name, scores: {}, total: 0 };
+    if (
+      !acc[key] ||
+      new Date(sub.submittedAt) > new Date(acc[key].submittedAt)
+    ) {
+      const scores = {};
+      let total = 0;
+      let count = 0;
+      Object.entries(sub.current || {}).forEach(([disc, score]) => {
+        const numScore = Number(score);
+        if (!isNaN(numScore)) {
+          scores[disc] = numScore;
+          total += numScore;
+          if (numScore > 0) count += 1;
+        }
+      });
+      const average = count > 0 ? (total / count).toFixed(2) : "-";
+      acc[key] = { name, scores, total, average, submittedAt: sub.submittedAt };
     }
-    Object.entries(sub.current || {}).forEach(([disc, score]) => {
-      acc[key].scores[disc] = score;
-      acc[key].total += score;
-    });
     return acc;
   }, {});
 
   const disciplineAverages = disciplines.reduce((acc, disc) => {
     const scores = submissions
-      .map((sub) => sub.current[disc] || 0)
+      .map((sub) => Number(sub.current[disc]) || 0)
       .filter((score) => score > 0);
-    acc[disc] =
-      scores.length > 0
-        ? (
-            scores.reduce((sum, score) => sum + score, 0) / scores.length
-          ).toFixed(2)
-        : "-";
+    acc[disc] = {
+      average:
+        scores.length > 0
+          ? (
+              scores.reduce((sum, score) => sum + score, 0) / scores.length
+            ).toFixed(2)
+          : "-",
+      sum:
+        scores.length > 0
+          ? scores.reduce((sum, score) => sum + score, 0).toFixed(2)
+          : "-",
+    };
     return acc;
   }, {});
 
-  // Calculate average of total scores
   const totalScores = Object.values(employeeData).map((emp) => emp.total);
   const averageTotalScore =
     totalScores.length > 0
@@ -152,6 +151,24 @@ export default function TeamPerformance() {
           totalScores.reduce((sum, score) => sum + score, 0) /
           totalScores.length
         ).toFixed(2)
+      : "-";
+  const sumTotalScore =
+    totalScores.length > 0
+      ? totalScores.reduce((sum, score) => sum + score, 0).toFixed(2)
+      : "-";
+  const totalAverages = Object.values(employeeData).map(
+    (emp) => Number(emp.average) || 0
+  );
+  const averageOfAverages =
+    totalAverages.length > 0
+      ? (
+          totalAverages.reduce((sum, avg) => sum + avg, 0) /
+          totalAverages.length
+        ).toFixed(2)
+      : "-";
+  const sumOfAverages =
+    totalAverages.length > 0
+      ? totalAverages.reduce((sum, avg) => sum + avg, 0).toFixed(2)
       : "-";
 
   return (
@@ -225,6 +242,7 @@ export default function TeamPerformance() {
                 <th key={disc}>{disc}</th>
               ))}
               <th>Total Score</th>
+              <th>Average Score</th>
             </tr>
           </thead>
           <tbody>
@@ -235,6 +253,7 @@ export default function TeamPerformance() {
                   <td key={disc}>{emp.scores[disc] || "-"}</td>
                 ))}
                 <td>{emp.total}</td>
+                <td>{emp.average}</td>
               </tr>
             ))}
           </tbody>
@@ -244,9 +263,20 @@ export default function TeamPerformance() {
                 <strong>Average</strong>
               </td>
               {disciplines.map((disc) => (
-                <td key={disc}>{disciplineAverages[disc]}</td>
+                <td key={disc}>{disciplineAverages[disc].average}</td>
               ))}
               <td>{averageTotalScore}</td>
+              <td>{averageOfAverages}</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Sum</strong>
+              </td>
+              {disciplines.map((disc) => (
+                <td key={disc}>{disciplineAverages[disc].sum}</td>
+              ))}
+              <td>{sumTotalScore}</td>
+              <td>{sumOfAverages}</td>
             </tr>
           </tfoot>
         </table>

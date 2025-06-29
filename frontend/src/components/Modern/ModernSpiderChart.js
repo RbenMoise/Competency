@@ -1,11 +1,13 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import axios from "axios";
 import SupervisorSpiderChart from "./SupervisorSpiderChart";
 import SpiderChart from "./SpiderChart";
 import Guidelines from "../Guidelines/Guidelines";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LOGO from "../../assets/nock j.png";
 import ScoreFormManager from "../ScoreInput/ScoreFormManager";
+import LoadingSpinner from "../SupDash/Loading Spinner";
+import AuthContext from "../context/AuthContext";
 import "./Modern.css";
 
 const categories = [
@@ -17,25 +19,35 @@ const categories = [
   "Renewable Energy",
   "Field Work",
   "Reporting",
+  "Data Management",
 ];
 
 export default function ModernSpiderChart() {
+  const { user } = useContext(AuthContext);
   const [showPopup, setShowPopup] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoadingChart, setIsLoadingChart] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(true);
   const [dbScores, setDbScores] = useState(null);
-  const [user, setUser] = useState(null);
   const [showSubmissionMessage, setShowSubmissionMessage] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState("");
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState("chart");
   const [committed, setCommitted] = useState(false);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
+      setIsLoading(true);
       try {
+        if (!user || user.role !== "employee") {
+          setError("Access restricted to employees");
+          setIsLoading(false);
+          return;
+        }
+
         const res = await axios.get(
           `${
             process.env.REACT_APP_API_URL
@@ -48,7 +60,6 @@ export default function ModernSpiderChart() {
         );
         console.log("API Response:", res.data);
         const userData = res.data.user;
-        setUser(userData);
 
         const hasScores =
           userData.submissions &&
@@ -92,11 +103,13 @@ export default function ModernSpiderChart() {
           );
           setShowSubmissionMessage(true);
         }
+        setIsLoading(false);
       } catch (err) {
         console.error("Fetch Error:", err.response || err);
         setError(err.response?.data?.message || "Failed to load user data.");
+        setIsLoading(false);
         if (err.response?.status === 401) {
-          window.location.href = "/login";
+          navigate("/login");
         }
       }
     };
@@ -110,7 +123,7 @@ export default function ModernSpiderChart() {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [user, navigate]);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -119,12 +132,10 @@ export default function ModernSpiderChart() {
   const handleSubmission = (newScores) => {
     setShowSubmissionMessage(true);
     setSubmissionMessage("✅ Assessment submitted successfully!");
-
     setDbScores({
       currentScores: newScores.currentScores,
       projectedScores: newScores.projectedScores,
     });
-
     setIsLoadingChart(true);
     setTimeout(() => {
       setIsLoadingChart(false);
@@ -149,6 +160,7 @@ export default function ModernSpiderChart() {
   };
 
   const handleCommitToggle = async () => {
+    setIsLoading(true);
     try {
       const submissionId = user.submissions[0]._id;
       const newCommitted = !committed;
@@ -172,10 +184,13 @@ export default function ModernSpiderChart() {
       console.error("Commit Error:", err);
       setSubmissionMessage("❌ Failed to update commitment status.");
       setShowSubmissionMessage(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleLogout = async () => {
+    setIsLoading(true);
     try {
       await axios.post(
         `${
@@ -186,31 +201,35 @@ export default function ModernSpiderChart() {
         {},
         { withCredentials: true }
       );
-      window.location.href = "/login";
+      navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
+      setError("Failed to log out.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  if (isLoading) {
+    return <LoadingSpinner message="Loading your data..." />;
+  }
+
   if (error) {
-    return <div className="error-message">{error}</div>;
+    return (
+      <div className="error-message">
+        {error}
+        <button
+          className="retry-button"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   if (!user) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner">
-          <div className="spinner-sector spinner-sector-primary"></div>
-          <div className="spinner-sector spinner-sector-secondary"></div>
-          <div className="spinner-sector spinner-sector-tertiary"></div>
-        </div>
-        <div className="loading-content">
-          <img src={LOGO} alt="NOCK Logo" className="loading-logo" />
-          <h2 className="loading-text">Loading Your Data...</h2>
-          <p className="loading-subtext">Please wait while we prepare</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading your data..." />;
   }
 
   const nameParts = user.name.split(" ");
@@ -275,6 +294,7 @@ export default function ModernSpiderChart() {
         <button
           onClick={() => setShowPopup(true)}
           className="modern-button guidelines-btn"
+          disabled={isLoading}
         >
           Open Competency Guidelines <span className="button-icon">📊</span>
         </button>
@@ -300,15 +320,7 @@ export default function ModernSpiderChart() {
             </div>
           )}
           {isLoadingChart ? (
-            <div className="chart-loading-container">
-              <div className="chart-loading-spinner">
-                <div className="spinner-circle"></div>
-              </div>
-              <div className="chart-loading-content">
-                <h3 className="chart-loading-text">Generating Your Chart...</h3>
-                <p className="chart-loading-subtext">Please wait a moment</p>
-              </div>
-            </div>
+            <LoadingSpinner message="Generating your chart..." />
           ) : showForm ? (
             <ScoreFormManager
               categories={categories}

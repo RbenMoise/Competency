@@ -196,3 +196,36 @@
     padding: 0.8rem 0.8rem 0.4rem;
   }
 }
+
+
+.error-message {
+  background-color: #ffebee;
+  color: #e2483a;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  border-left: 3px solid #c62828;
+  display: flex;
+  align-items: center;
+  font-size: 12px;  /* Adjusted from 3px to be readable */
+  font-weight: 400;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.error-message:before {
+  content: "⚠";
+  margin-right: 8px;
+  font-size: 14px;  /* Slightly reduced icon size */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);  /* Reduced movement */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

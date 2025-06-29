@@ -1,12 +1,12 @@
 /* Base Styles */
 .assessments-container {
   background-color: #f9f9f9;
-  min-height: 100vh;
-  padding: 2rem;
-
-  color: #000;
-  margin-left: 13%;
-  margin-right: 13%;
+ font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  color: #2c3e50;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
 }
 
 .assessments-header {
@@ -60,9 +60,9 @@
 }
 
 .logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .dashlink {
@@ -1184,4 +1184,68 @@
 .status-badge.rejected {
   background-color: #F44336;
   color: white;
+}
+
+
+
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .modern-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .status-message {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .approval-modal {
+    padding: 15px;
+  }
+  
+  .modal-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .modal-actions button {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .assessments-container {
+    padding: 15px;
+  }
+  
+  .filter-tabs {
+    gap: 6px;
+  }
+  
+  .tab {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .sub-table-table th,
+  .sub-table-table td {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+  
+  .action-buttons {
+    min-width: 120px;
+  }
+  
+  .reject-container {
+    flex-direction: column;
+  }
+  
+  .reject-input {
+    width: 100%;
+  }
 }

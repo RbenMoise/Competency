@@ -1,12 +1,11 @@
 /* Base Styles */
 .dashboard-container {
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  color: #2c3e50;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
   background-color: #f9f9f9;
-  min-height: 100vh;
-  padding: 2rem;
-  
-  color: #000;
-  margin-left: 13%;
-  margin-right: 13%;
 }
 
 /* //////////////profile */
@@ -39,9 +38,9 @@
 }
 
 .logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #000;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .modern-profile {

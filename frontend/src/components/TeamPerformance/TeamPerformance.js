@@ -12,12 +12,27 @@ export default function TeamPerformance() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+   const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
+
+  useEffect(() => {
+    // Check if mobile on initial render and on resize
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -174,12 +189,14 @@ export default function TeamPerformance() {
   return (
     <div className="team-performance-container">
       <header className="modern-header">
-        <div className="modern-logo">
-          <div className="logo-placeholder">
-            <img className="logo-icon" src={LOGO} alt="logo" />
-            <span className="logo-text">Energizing Kenya</span>
+        {!isMobile && (
+          <div className="modern-logo">
+            <div className="logo-placeholder">
+              <img className="logo-icon" src={LOGO} alt="logo" />
+              <span className="logo-text">Upstream</span>
+            </div>
           </div>
-        </div>
+        )}
         <Link className="dashlink" to="/supDash">
           <svg
             width="24"
@@ -188,28 +205,15 @@ export default function TeamPerformance() {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <rect x="3" y="3" width="8" height="8" rx="1" fill="#0c0c0c" />
-            <rect
-              x="3"
-              y="13"
-              width="8"
-              height="8"
-              rx="1"
-              fill="#0c0c0c"
-              opacity="0.8"
+            <rect x="2" y="2" width="8" height="8" rx="2" fill="#000000" />
+            <rect x="14" y="14" width="8" height="8" rx="2" fill="#000000" />
+            <path
+              d="M12 6V12M12 12V18M12 12H18M12 12H6"
+              stroke="#000000"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             />
-            <rect x="13" y="3" width="8" height="8" rx="1" fill="#0c0c0c" />
-            <rect
-              x="13"
-              y="13"
-              width="8"
-              height="8"
-              rx="1"
-              fill="#0c0c0c"
-              opacity="0.8"
-            />
-            <path d="M12 3V21" stroke="#e0e0e0" strokeWidth="1.5" />
-            <path d="M3 12H21" stroke="#e0e0e0" strokeWidth="1.5" />
           </svg>
           Dashboard
         </Link>

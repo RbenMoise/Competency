@@ -1,10 +1,47 @@
 import React, { useState } from "react";
-// import API from "../../api";
 import { useNavigate, Link } from "react-router-dom";
 import "./Signup.css";
 import axios from "axios";
 
 export default function Signup() {
+  // Whitelisted email domains
+  const emailWhitelist = [
+    "mmaina@nockenya.co.ke",
+    "mmutunga@nockenya.co.ke",
+    "pkwanjau@nockenya.co.ke",
+    "podhiambo@nockenya.co.ke",
+    "pagumbah@nockenya.co.ke",
+    "srono@nockenya.co.ke",
+    "smutai@nockenya.co.ke",
+    "srotich@nockenya.co.ke",
+    "vmwangi@nockenya.co.ke",
+    "imurunga@nockenya.co.ke",
+    "jimani@nockenya.co.ke",
+    "jkioko@nockenya.co.ke",
+    "jikinya@nockenya.co.ke",
+    "jkibii@nockenya.co.ke",
+    "jatuta@nockenya.co.ke",
+    "kasena@nockenya.co.ke",
+    "kmosomtai@nockenya.co.ke",
+    "lkoiyo@nockenya.co.ke",
+    "lntipilit@nockenya.co.ke",
+    "lobwogo@nockenya.co.ke",
+    "amasinde@nockenya.co.ke",
+    "akaranja@nockenya.co.ke",
+    "ameitamei@nockenya.co.ke",
+    "amulinge@nockenya.co.ke",
+    "aoduor@nockenya.co.ke",
+    "amutua@nockenya.co.ke",
+    "aomar@nockenya.co.ke",
+    "corora@nockenya.co.ke",
+    "eobike@nockenya.co.ke",
+    "ewanjala@nockenya.co.ke",
+    "ekimburi@nockenya.co.ke",
+    "emwachoni@nockenya.co.ke",
+    "gosukuku@nockenya.co.ke",
+    "hsonkoi@nockenya.co.ke"
+  ];
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -12,17 +49,25 @@ export default function Signup() {
     role: "employee",
     occupation: "",
   });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (error) setError(""); // Clear error when user types
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    
+    // Check if email is whitelisted
+    if (!emailWhitelist.includes(form.email.toLowerCase())) {
+      setError("Only authorized email addresses can sign up");
+      return;
+    }
+
     try {
       await axios.post(
-        // api
         `${process.env.REACT_APP_API_URL}/api/auth/signup`,
         form
       );
@@ -42,6 +87,8 @@ export default function Signup() {
         </div>
 
         <form onSubmit={handleSignup} className="signup-form">
+          {error && <div className="error-message">{error}</div>}
+          
           <div className="inpput-group">
             <input
               name="name"
@@ -63,7 +110,7 @@ export default function Signup() {
               required
               className="form-input"
             />
-
+            <label className="input-label"></label>
             <div className="input-highlight"></div>
           </div>
 

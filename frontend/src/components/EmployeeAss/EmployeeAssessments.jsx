@@ -9,36 +9,26 @@ import LoadingSpinner from "../SupDash/Loading Spinner";
 export default function EmployeeAssessments() {
   function DashboardIcon() {
     return (
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect x="3" y="3" width="8" height="8" rx="1" fill="#0c0c0c" />
-        <rect
-          x="3"
-          y="13"
-          width="8"
-          height="8"
-          rx="1"
-          fill="#0c0c0c"
-          opacity="0.8"
-        />
-        <rect x="13" y="3" width="8" height="8" rx="1" fill="#0c0c0c" />
-        <rect
-          x="13"
-          y="13"
-          width="8"
-          height="8"
-          rx="1"
-          fill="#0c0c0c"
-          opacity="0.8"
-        />
-        <path d="M12 3V21" stroke="#e0e0e0" strokeWidth="1.5" />
-        <path d="M3 12H21" stroke="#e0e0e0" strokeWidth="1.5" />
-      </svg>
+          <svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+ 
+  <rect x="2" y="2" width="8" height="8" rx="2" fill="#000000" />
+ 
+  <rect x="14" y="14" width="8" height="8" rx="2" fill="#000000" />
+  
+  <path
+    d="M12 6V12M12 12V18M12 12H18M12 12H6"
+    stroke="#000000"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  />
+</svg>
     );
   }
 
@@ -263,7 +253,7 @@ export default function EmployeeAssessments() {
         <div className="modern-logo">
           <div className="logo-placeholder">
             <img className="logo-icon" src={LOGO} alt="logo" />
-            <span className="logo-text">Energizing Kenya</span>
+            <span className="logo-text">Upstream</span>
           </div>
         </div>
         <Link className="dashlink" to="/supDash">

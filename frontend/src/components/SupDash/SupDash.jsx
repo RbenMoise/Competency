@@ -186,7 +186,7 @@ export default function SupDash() {
         <div className="modern-logo">
           <div className="logo-placeholder">
             <img className="logo-icon" src={LOGO} alt="logo" />
-            <span className="logo-text">Energizing Kenya</span>
+            <span className="logo-text">Upstream</span>
           </div>
         </div>
         <div className="header-right">

@@ -35,8 +35,28 @@ export default function ModernSpiderChart() {
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState("chart");
   const [committed, setCommitted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+
+
+
+
+useEffect(() => {
+    // Check if mobile on initial render and on resize
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
+
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -115,6 +135,7 @@ export default function ModernSpiderChart() {
     };
 
     fetchUserData();
+
 
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -240,13 +261,16 @@ export default function ModernSpiderChart() {
 
   return (
     <div className="modern-chart-container">
-      <header className="modern-header">
-        <div className="modern-logo">
-          <div className="logo-placeholder">
-            <img className="logo-icon" src={LOGO} alt="logo" />
-            <span className="logo-text">Energizing Kenya</span>
+
+<header className="modern-header">
+        {!isMobile && (
+          <div className="modern-logo">
+            <div className="logo-placeholder">
+              <img className="logo-icon" src={LOGO} alt="logo" />
+              <span className="logo-text">Upstream</span>
+            </div>
           </div>
-        </div>
+        )}
         <div className="modern-profile" ref={dropdownRef}>
           <div className="profile-container" onClick={toggleDropdown}>
             <div className="profile-avatar">{initials}</div>

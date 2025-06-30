@@ -3,10 +3,54 @@ const User = require("../models/User");
 exports.signup = async (req, res) => {
   const { name, email, password, role, occupation } = req.body;
 
+  // Whitelisted emails (should match frontend)
+  const emailWhitelist = [
+    "mmaina@nockenya.co.ke",
+    "mmutunga@nockenya.co.ke",
+    "pkwanjau@nockenya.co.ke",
+    "podhiambo@nockenya.co.ke",
+    "pagumbah@nockenya.co.ke",
+    "srono@nockenya.co.ke",
+    "smutai@nockenya.co.ke",
+    "srotich@nockenya.co.ke",
+    "vmwangi@nockenya.co.ke",
+    "imurunga@nockenya.co.ke",
+    "jimani@nockenya.co.ke",
+    "jkioko@nockenya.co.ke",
+    "jikinya@nockenya.co.ke",
+    "jkibii@nockenya.co.ke",
+    "jatuta@nockenya.co.ke",
+    "kasena@nockenya.co.ke",
+    "kmosomtai@nockenya.co.ke",
+    "lkoiyo@nockenya.co.ke",
+    "lntipilit@nockenya.co.ke",
+    "lobwogo@nockenya.co.ke",
+    "amasinde@nockenya.co.ke",
+    "akaranja@nockenya.co.ke",
+    "ameitamei@nockenya.co.ke",
+    "amulinge@nockenya.co.ke",
+    "aoduor@nockenya.co.ke",
+    "amutua@nockenya.co.ke",
+    "aomar@nockenya.co.ke",
+    "corora@nockenya.co.ke",
+    "eobike@nockenya.co.ke",
+    "ewanjala@nockenya.co.ke",
+    "ekimburi@nockenya.co.ke",
+    "emwachoni@nockenya.co.ke",
+    "gosukuku@nockenya.co.ke",
+    "hsonkoi@nockenya.co.ke"
+  ];
+
   try {
+    // Check if email is whitelisted
+    if (!emailWhitelist.includes(email.toLowerCase())) {
+      return res.status(403).json({ message: "Unauthorized email address" });
+    }
+
     const existingUser = await User.findOne({ email });
-    if (existingUser)
+    if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
+    }
 
     const newUser = await User.create({
       name,

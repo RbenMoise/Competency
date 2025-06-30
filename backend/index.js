@@ -15,6 +15,7 @@ app.use(
       "http://localhost:3000",
       "https://nockcompetency-qnwln.ondigitalocean.app",
       "https://nockcompetency-qad9e.ondigitalocean.app",
+      "https://nockcompetency.co.ke"
     ],
     credentials: true,
   })

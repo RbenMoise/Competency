@@ -32,3 +32,4 @@ frontend/public/*.exe
 node_modules/
 .cache/
 *.dmg
+frontend/node_modules/.cache/

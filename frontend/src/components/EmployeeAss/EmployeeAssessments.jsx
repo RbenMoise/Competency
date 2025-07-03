@@ -9,26 +9,23 @@ import LoadingSpinner from "../SupDash/Loading Spinner";
 export default function EmployeeAssessments() {
   function DashboardIcon() {
     return (
-          <svg
-  width="24"
-  height="24"
-  viewBox="0 0 24 24"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
- 
-  <rect x="2" y="2" width="8" height="8" rx="2" fill="#000000" />
- 
-  <rect x="14" y="14" width="8" height="8" rx="2" fill="#000000" />
-  
-  <path
-    d="M12 6V12M12 12V18M12 12H18M12 12H6"
-    stroke="#000000"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  />
-</svg>
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect x="2" y="2" width="8" height="8" rx="2" fill="#000000" />
+        <rect x="14" y="14" width="8" height="8" rx="2" fill="#000000" />
+        <path
+          d="M12 6V12M12 12V18M12 12H18M12 12H6"
+          stroke="#000000"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     );
   }
 
@@ -50,6 +47,9 @@ export default function EmployeeAssessments() {
   const [supervisorAssessment, setSupervisorAssessment] = useState({});
   const [modalMode, setModalMode] = useState("edit");
   const [isLoading, setIsLoading] = useState(true);
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // You can adjust this number
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -180,6 +180,7 @@ export default function EmployeeAssessments() {
       setShowApprovalModal(false);
       setCurrentSubmission(null);
       setSupervisorAssessment({});
+      setCurrentPage(1); // Reset to first page after approval
     } catch (err) {
       console.error("Error approving submission:", err);
       setError("Failed to approve submission.");
@@ -200,6 +201,7 @@ export default function EmployeeAssessments() {
       console.log(`Submission ${submissionId} rejected:`, res.data);
       await fetchSubmissions();
       setRejectComments((prev) => ({ ...prev, [submissionId]: "" }));
+      setCurrentPage(1); // Reset to first page after rejection
     } catch (err) {
       console.error("Error rejecting submission:", err);
       setError("Failed to reject submission.");
@@ -218,6 +220,14 @@ export default function EmployeeAssessments() {
             ? sub.status === "rejected"
             : false
         );
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredSubmissions.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (isLoading) {
     return <LoadingSpinner message="Data is on the way..." />;
@@ -301,25 +311,37 @@ export default function EmployeeAssessments() {
         <div className="filter-tabs">
           <div
             className={`tab ${filter === "All" ? "active" : ""}`}
-            onClick={() => setFilter("All")}
+            onClick={() => {
+              setFilter("All");
+              setCurrentPage(1); // Reset to first page when filter changes
+            }}
           >
             All ({submissions.length})
           </div>
           <div
             className={`tab ${filter === "Pending" ? "active" : ""}`}
-            onClick={() => setFilter("Pending")}
+            onClick={() => {
+              setFilter("Pending");
+              setCurrentPage(1);
+            }}
           >
             Pending ({summary.pending})
           </div>
           <div
             className={`tab ${filter === "Completed" ? "active" : ""}`}
-            onClick={() => setFilter("Completed")}
+            onClick={() => {
+              setFilter("Completed");
+              setCurrentPage(1);
+            }}
           >
             Completed ({summary.approved})
           </div>
           <div
             className={`tab ${filter === "Rejected" ? "active" : ""}`}
-            onClick={() => setFilter("Rejected")}
+            onClick={() => {
+              setFilter("Rejected");
+              setCurrentPage(1);
+            }}
           >
             Rejected ({summary.rejected})
           </div>
@@ -333,86 +355,108 @@ export default function EmployeeAssessments() {
             </div>
           </div>
         ) : (
-          <div className="submissions-table">
-            <table className="sub-table-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Position</th>
-                  <th>Status</th>
-                  <th>Submitted At</th>
-                  <th>Employee Assessment</th>
-                  <th>Supervisor Assessment</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSubmissions.map((submission) => (
-                  <tr key={submission._id}>
-                    <td>{submission.submitter.name}</td>
-                    <td>{submission.submitter.occupation}</td>
-                    <td>
-                      <span
-                        className={`status-badge ${submission.status.toLowerCase()}`}
-                      >
-                        {submission.status}
-                      </span>
-                    </td>
-                    <td>{new Date(submission.submittedAt).toLocaleString()}</td>
-                    <td>{formatScores(submission.current)}</td>
-                    <td>{formatScores(submission.supervisorAssessment)}</td>
-                    <td>
-                      {submission.status === "pending" ? (
-                        <div className="action-buttons">
-                          <button
-                            className="approve-btn"
-                            onClick={() =>
-                              openApprovalModal(submission, "edit")
-                            }
-                          >
-                            Assess
-                          </button>
-                          <div className="reject-container">
-                            <input
-                              type="text"
-                              placeholder="Rejection reason..."
-                              value={rejectComments[submission._id] || ""}
-                              onChange={(e) =>
-                                setRejectComments((prev) => ({
-                                  ...prev,
-                                  [submission._id]: e.target.value,
-                                }))
-                              }
-                              className="reject-input"
-                            />
-                            <button
-                              className="reject-btn"
-                              onClick={() =>
-                                handleReject(
-                                  submission._id,
-                                  rejectComments[submission._id] || ""
-                                )
-                              }
-                              disabled={!rejectComments[submission._id]}
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          className="view-btn"
-                          onClick={() => openApprovalModal(submission, "view")}
-                        >
-                          View
-                        </button>
-                      )}
-                    </td>
+          <>
+            <div className="submissions-table">
+              <table className="sub-table-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Status</th>
+                    <th>Submitted At</th>
+                    <th>Employee Assessment</th>
+                    <th>Supervisor Assessment</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {currentItems.map((submission) => (
+                    <tr key={submission._id}>
+                      <td>{submission.submitter.name}</td>
+                      <td>{submission.submitter.occupation}</td>
+                      <td>
+                        <span
+                          className={`status-badge ${submission.status.toLowerCase()}`}
+                        >
+                          {submission.status}
+                        </span>
+                      </td>
+                      <td>{new Date(submission.submittedAt).toLocaleString()}</td>
+                      <td>{formatScores(submission.current)}</td>
+                      <td>{formatScores(submission.supervisorAssessment)}</td>
+                      <td>
+                        {submission.status === "pending" ? (
+                          <div className="action-buttons">
+                            <button
+                              className="approve-btn"
+                              onClick={() =>
+                                openApprovalModal(submission, "edit")
+                              }
+                            >
+                              Assess
+                            </button>
+                            <div className="reject-container">
+                              <input
+                                type="text"
+                                placeholder="Rejection reason..."
+                                value={rejectComments[submission._id] || ""}
+                                onChange={(e) =>
+                                  setRejectComments((prev) => ({
+                                    ...prev,
+                                    [submission._id]: e.target.value,
+                                  }))
+                                }
+                                className="reject-input"
+                              />
+                              <button
+                                className="reject-btn"
+                                onClick={() =>
+                                  handleReject(
+                                    submission._id,
+                                    rejectComments[submission._id] || ""
+                                  )
+                                }
+                                disabled={!rejectComments[submission._id]}
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            className="view-btn"
+                            onClick={() => openApprovalModal(submission, "view")}
+                          >
+                            View
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Pagination controls */}
+            <div className="pagination-controls">
+              <button
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="pagination-button"
+              >
+                Previous
+              </button>
+              <span className="page-info">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="pagination-button"
+              >
+                Next
+              </button>
+            </div>
+          </>
         )}
       </div>
       {showApprovalModal && currentSubmission && (

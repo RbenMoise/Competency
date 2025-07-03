@@ -77,25 +77,25 @@ const competencyCharts = {
       level: 2,
       title: "Basic Reporter",
       description:
-        "Evidence of at least 2 reports in the past 2 years, with at least 1 reviewed and uploaded to the Exploration repository.",
+        "Evidence of at least 2 reports in the past 2 years, with at least 1 reviewed and uploaded to the Exploration repository By 10th July .",
     },
     {
       level: 3,
       title: "Proficient Reporter",
       description:
-        "Evidence of at least 3 reports in the past 2 years, with at least 2 reviewed and uploaded to the Exploration repository.",
+        "Evidence of at least 3 reports in the past 2 years, with at least 2 reviewed and uploaded to the Exploration repository By 10th July .",
     },
     {
       level: 4,
       title: "Advanced Reporter",
       description:
-        "Evidence of at least 4 reports in the past 2 years, with at least 3 reviewed and uploaded to the Exploration repository.",
+        "Evidence of at least 4 reports in the past 2 years, with at least 3 reviewed and uploaded to the Exploration repository By 10th July .",
     },
     {
       level: 5,
       title: "Master Reporter",
       description:
-        "Evidence of at least 6 reports in the past 2 years, with at least 4 reviewed and uploaded to the Exploration repository.",
+        "Evidence of at least 6 reports in the past 2 years, with at least 4 reviewed and uploaded to the Exploration repository By 10th July .",
     },
   ],
 };

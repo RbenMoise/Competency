@@ -224,7 +224,10 @@ export default function EmployeeAssessments() {
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredSubmissions.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = filteredSubmissions.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
   const totalPages = Math.ceil(filteredSubmissions.length / itemsPerPage);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -381,7 +384,9 @@ export default function EmployeeAssessments() {
                           {submission.status}
                         </span>
                       </td>
-                      <td>{new Date(submission.submittedAt).toLocaleString()}</td>
+                      <td>
+                        {new Date(submission.submittedAt).toLocaleString()}
+                      </td>
                       <td>{formatScores(submission.current)}</td>
                       <td>{formatScores(submission.supervisorAssessment)}</td>
                       <td>
@@ -425,7 +430,9 @@ export default function EmployeeAssessments() {
                         ) : (
                           <button
                             className="view-btn"
-                            onClick={() => openApprovalModal(submission, "view")}
+                            onClick={() =>
+                              openApprovalModal(submission, "view")
+                            }
                           >
                             View
                           </button>
@@ -481,6 +488,17 @@ export default function EmployeeAssessments() {
               <p>
                 <strong>Role:</strong> {currentSubmission.submitter.role}
               </p>
+              {modalMode === "view" &&
+                currentSubmission.approvedBy &&
+                currentSubmission.approvedAt && (
+                  <p>
+                    <strong>Reviewed by:</strong> {currentSubmission.approvedBy}{" "}
+                    on{" "}
+                    {new Date(
+                      currentSubmission.approvedAt
+                    ).toLocaleDateString()}
+                  </p>
+                )}
             </div>
             <div className="scores-comparison">
               <h4>Performance Assessment</h4>

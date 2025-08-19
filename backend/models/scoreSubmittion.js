@@ -38,10 +38,10 @@ const scoreSubmissionSchema = new mongoose.Schema({
   approvalComments: {
     type: String,
   },
-  committed: {
-    type: Boolean,
-    default: false,
-  },
+  // committed: {
+  //   type: Boolean,
+  //   default: false,
+  // },
 });
 
 module.exports = mongoose.model("ScoreSubmission", scoreSubmissionSchema);

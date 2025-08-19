@@ -70,17 +70,6 @@ const SupervisorSpiderChart = ({
             {new Date(approvedAt).toLocaleDateString()}
           </p>
         )}
-        {/* <div className="commit-toggle">
-          <label className="commit-label">
-            On My Way!
-            <input
-              type="checkbox"
-              checked={committed}
-              onChange={onCommitToggle}
-            />
-            <span className="commit-slider" />
-          </label>
-        </div> */}
       </div>
     </div>
   );

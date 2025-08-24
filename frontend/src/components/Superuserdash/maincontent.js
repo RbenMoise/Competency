@@ -12,14 +12,18 @@ import {
   ReferenceLine,
   Cell,
 } from "recharts";
+import axios from "axios";
 import "./MainContent.css";
 
-export default function MainContent({
-  activeSection,
-  allUsers,
-  submissions,
-  summary,
-}) {
+export default function MainContent({ activeSection, allUsers, summary }) {
+  const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [submissions, setSubmissions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const itemsPerPage = 5;
+
   const formatScores = (scores) => {
     if (!scores || typeof scores !== "object") return "No assessment";
     return Object.entries(scores)
@@ -69,10 +73,52 @@ export default function MainContent({
   const [chartData, setChartData] = useState([]);
   const [animationStep, setAnimationStep] = useState(0);
 
+  const fetchSubmissions = async () => {
+    setIsLoading(true);
+    try {
+      const teamRes = await axios.get(
+        `${process.env.REACT_APP_API_URL || "http://localhost:4000"}/api/team`,
+        { withCredentials: true }
+      );
+      console.log("Fetched team data:", teamRes.data);
+      setSubmissions(
+        teamRes.data.users.flatMap((user) =>
+          user.submissions.map((sub) => ({
+            ...sub,
+            submitter: {
+              _id: user._id,
+              name: user.name,
+              email: user.email,
+              occupation: user.occupation,
+              role: user.role,
+            },
+          }))
+        )
+      );
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Error fetching submissions:", err);
+      setError("Failed to load submissions.");
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (
+      activeSection === "overview" ||
+      activeSection === "users" ||
+      activeSection === "supervisors" ||
+      activeSection === "employees" ||
+      activeSection === "submissions"
+    ) {
+      fetchSubmissions();
+    }
+  }, [activeSection]);
+
   useEffect(() => {
     if (activeSection === "overview") {
-      setChartData([]); // Reset chart data
-      setAnimationStep(0); // Reset animation
+      setChartData([]);
+      setAnimationStep(0);
 
       const interval = setInterval(() => {
         setAnimationStep((prev) => {
@@ -83,7 +129,7 @@ export default function MainContent({
           clearInterval(interval);
           return prev;
         });
-      }, 500); // Add one data point every 500ms
+      }, 500);
 
       return () => clearInterval(interval);
     }
@@ -95,6 +141,41 @@ export default function MainContent({
       : activeSection === "employees"
       ? allUsers.filter((u) => u.role === "employee")
       : allUsers;
+
+  const openSubmissionsModal = (user) => {
+    setSelectedUser(user);
+    setCurrentPage(1);
+    setShowSubmissionsModal(true);
+  };
+
+  const userSubmissions = selectedUser
+    ? submissions.filter((sub) => sub.submitter?._id === selectedUser._id)
+    : [];
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentSubmissions = userSubmissions.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+  const totalPages = Math.ceil(userSubmissions.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  if (isLoading) {
+    return <div className="loading-message">Loading submissions...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error-message">{error}</div>
+        <button className="retry-button" onClick={fetchSubmissions}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="main-content">
@@ -214,6 +295,7 @@ export default function MainContent({
                 <th>Role</th>
                 <th>Occupation</th>
                 <th>Submissions</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -224,6 +306,14 @@ export default function MainContent({
                   <td>{u.role || "-"}</td>
                   <td>{u.occupation || "-"}</td>
                   <td>{u.submissions?.length || 0}</td>
+                  <td>
+                    <button
+                      className="view-btn"
+                      onClick={() => openSubmissionsModal(u)}
+                    >
+                      View
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -276,6 +366,109 @@ export default function MainContent({
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {showSubmissionsModal && selectedUser && (
+        <div className="modal-overlay">
+          <div className="submissions-modal">
+            <h3>Submissions for {selectedUser.name}</h3>
+            <div className="user-info">
+              <p>
+                <strong>Name:</strong> {selectedUser.name || "Unknown"}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedUser.email || "-"}
+              </p>
+              <p>
+                <strong>Position:</strong> {selectedUser.occupation || "-"}
+              </p>
+              <p>
+                <strong>Role:</strong> {selectedUser.role || "-"}
+              </p>
+            </div>
+            {userSubmissions.length === 0 ? (
+              <div className="empty-state-card">
+                <div className="empty-state-content">
+                  <div className="empty-icon">🔍</div>
+                  <h3>No Submissions</h3>
+                  <p>This user has no submissions.</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <table className="submissions-table">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Submitted At</th>
+                      <th>Reviewed By</th>
+                      <th>Reviewed At</th>
+                      <th>Employee Scores</th>
+                      <th>Supervisor Scores</th>
+                      <th>Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentSubmissions.map((sub) => (
+                      <tr key={sub._id}>
+                        <td>
+                          <span
+                            className={`status-badge ${
+                              sub.status?.toLowerCase() || "unknown"
+                            }`}
+                          >
+                            {sub.status || "Unknown"}
+                          </span>
+                        </td>
+                        <td>
+                          {sub.submittedAt
+                            ? new Date(sub.submittedAt).toLocaleString()
+                            : "-"}
+                        </td>
+                        <td>{sub.approvedBy || "-"}</td>
+                        <td>
+                          {sub.approvedAt &&
+                          !isNaN(new Date(sub.approvedAt).getTime())
+                            ? new Date(sub.approvedAt).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td>{formatScores(sub.current)}</td>
+                        <td>{formatScores(sub.supervisorAssessment)}</td>
+                        <td>{sub.approvalComments || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="pagination-controls">
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="pagination-button"
+                  >
+                    Previous
+                  </button>
+                  <span className="page-info">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="pagination-button"
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
+            )}
+            <div className="modal-actions">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowSubmissionsModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -17,6 +17,7 @@ import "./MainContent.css";
 
 export default function MainContent({ activeSection, allUsers, summary }) {
   const [viewMode, setViewMode] = useState("list"); // "list" or "submissions"
+  const [subViewMode, setSubViewMode] = useState("scores"); // "scores" or "spider"
   const [selectedUser, setSelectedUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [submissions, setSubmissions] = useState([]);
@@ -29,6 +30,12 @@ export default function MainContent({ activeSection, allUsers, summary }) {
     return Object.entries(scores)
       .map(([key, value]) => `${key}: ${value}`)
       .join(", ");
+  };
+
+  const formatDate = (date) => {
+    return date && !isNaN(new Date(date).getTime())
+      ? new Date(date).toLocaleString()
+      : "-";
   };
 
   const fullChartData = [
@@ -145,17 +152,28 @@ export default function MainContent({ activeSection, allUsers, summary }) {
   const openSubmissionsView = (user) => {
     setSelectedUser(user);
     setCurrentPage(1);
+    setSubViewMode("scores");
     setViewMode("submissions");
   };
 
   const goBackToList = () => {
     setSelectedUser(null);
+    setSubViewMode("scores");
     setViewMode("list");
   };
 
   const userSubmissions = selectedUser
     ? submissions.filter((sub) => sub.submitter?._id === selectedUser._id)
     : [];
+
+  const latestSubmission =
+    userSubmissions.length > 0
+      ? userSubmissions.reduce((latest, sub) =>
+          !latest || new Date(sub.submittedAt) > new Date(latest.submittedAt)
+            ? sub
+            : latest
+        )
+      : null;
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -332,7 +350,28 @@ export default function MainContent({ activeSection, allUsers, summary }) {
         viewMode === "submissions" &&
         selectedUser && (
           <div className="submissions-modal">
-            <h3>Submissions for {selectedUser.name}</h3>
+            <div className="modal-header">
+              <button
+                className="back-icon-btn"
+                onClick={goBackToList}
+                title="Back to Users"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+              <h3>Submissions for {selectedUser.name}</h3>
+            </div>
             <div className="user-info">
               <p>
                 <strong>Name:</strong> {selectedUser.name || "Unknown"}
@@ -346,6 +385,54 @@ export default function MainContent({ activeSection, allUsers, summary }) {
               <p>
                 <strong>Role:</strong> {selectedUser.role || "-"}
               </p>
+              {latestSubmission && (
+                <>
+                  <p>
+                    <strong>Status:</strong>{" "}
+                    <span
+                      className={`status-badge ${
+                        latestSubmission.status?.toLowerCase() || "unknown"
+                      }`}
+                    >
+                      {latestSubmission.status || "Unknown"}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Submitted At:</strong>{" "}
+                    {formatDate(latestSubmission.submittedAt)}
+                  </p>
+                  <p>
+                    <strong>Reviewed By:</strong>{" "}
+                    {latestSubmission.approvedBy || "-"}
+                  </p>
+                  <p>
+                    <strong>Reviewed At:</strong>{" "}
+                    {formatDate(latestSubmission.approvedAt)}
+                  </p>
+                  <p>
+                    <strong>Comments:</strong>{" "}
+                    {latestSubmission.approvalComments || "-"}
+                  </p>
+                </>
+              )}
+            </div>
+            <div className="view-toggle">
+              <button
+                className={`view-toggle-btn ${
+                  subViewMode === "scores" ? "active-view-btn" : ""
+                }`}
+                onClick={() => setSubViewMode("scores")}
+              >
+                Scores
+              </button>
+              <button
+                className={`view-toggle-btn ${
+                  subViewMode === "spider" ? "active-view-btn" : ""
+                }`}
+                onClick={() => setSubViewMode("spider")}
+              >
+                Spider Chart
+              </button>
             </div>
             {userSubmissions.length === 0 ? (
               <div className="empty-state-card">
@@ -355,47 +442,20 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                   <p>This user has no submissions.</p>
                 </div>
               </div>
-            ) : (
+            ) : subViewMode === "scores" ? (
               <>
                 <table className="submissions-table">
                   <thead>
                     <tr>
-                      <th>Status</th>
-                      <th>Submitted At</th>
-                      <th>Reviewed By</th>
-                      <th>Reviewed At</th>
                       <th>Employee Scores</th>
                       <th>Supervisor Scores</th>
-                      <th>Comments</th>
                     </tr>
                   </thead>
                   <tbody>
                     {currentSubmissions.map((sub) => (
                       <tr key={sub._id}>
-                        <td>
-                          <span
-                            className={`status-badge ${
-                              sub.status?.toLowerCase() || "unknown"
-                            }`}
-                          >
-                            {sub.status || "Unknown"}
-                          </span>
-                        </td>
-                        <td>
-                          {sub.submittedAt
-                            ? new Date(sub.submittedAt).toLocaleString()
-                            : "-"}
-                        </td>
-                        <td>{sub.approvedBy || "-"}</td>
-                        <td>
-                          {sub.approvedAt &&
-                          !isNaN(new Date(sub.approvedAt).getTime())
-                            ? new Date(sub.approvedAt).toLocaleDateString()
-                            : "-"}
-                        </td>
                         <td>{formatScores(sub.current)}</td>
                         <td>{formatScores(sub.supervisorAssessment)}</td>
-                        <td>{sub.approvalComments || "-"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -420,6 +480,14 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                   </button>
                 </div>
               </>
+            ) : (
+              <div className="empty-state-card">
+                <div className="empty-state-content">
+                  <div className="empty-icon">📊</div>
+                  <h3>Spider Chart Coming Soon</h3>
+                  <p>Spider chart visualization will be implemented later.</p>
+                </div>
+              </div>
             )}
             <div className="modal-actions">
               <button className="back-btn" onClick={goBackToList}>
@@ -456,18 +524,9 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                       {sub.status || "Unknown"}
                     </span>
                   </td>
-                  <td>
-                    {sub.submittedAt
-                      ? new Date(sub.submittedAt).toLocaleString()
-                      : "-"}
-                  </td>
+                  <td>{formatDate(sub.submittedAt)}</td>
                   <td>{sub.approvedBy || "-"}</td>
-                  <td>
-                    {sub.approvedAt &&
-                    !isNaN(new Date(sub.approvedAt).getTime())
-                      ? new Date(sub.approvedAt).toLocaleDateString()
-                      : "-"}
-                  </td>
+                  <td>{formatDate(sub.approvedAt)}</td>
                   <td>{formatScores(sub.current)}</td>
                   <td>{formatScores(sub.supervisorAssessment)}</td>
                 </tr>

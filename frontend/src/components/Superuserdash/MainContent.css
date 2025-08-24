@@ -39,7 +39,7 @@
 .submissions-modal p {
   font-size: 1rem;
   color: #4a5568;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .summary-chart {
@@ -195,18 +195,78 @@
   transform: scale(1.05);
 }
 
+.back-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 32px;
+  height: 32px;
+}
+
+.back-icon-btn:hover {
+  background-color: #4a5568;
+  transform: scale(1.05);
+}
+
+.back-icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .user-info {
   margin-bottom: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.5rem;
 }
 
 .user-info p {
-  margin: 0.5rem 0;
+  margin: 0.25rem 0;
   font-size: 1rem;
-  color: #2d3748;
+  color: #4a5568;
 }
 
 .user-info strong {
   color: #1a202c;
+}
+
+.view-toggle {
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.view-toggle-btn {
+  padding: 0.5rem 1rem;
+  background-color: #4c51bf;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.view-toggle-btn:hover {
+  background-color: #434190;
+  transform: scale(1.05);
+}
+
+.active-view-btn {
+  background-color: #2b6cb0;
 }
 
 .empty-state-card {

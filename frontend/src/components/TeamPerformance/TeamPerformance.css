@@ -1,6 +1,5 @@
-/* Base Styles */
 .team-performance-container {
-  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   color: #2c3e50;
   max-width: 1200px;
   margin: 0 auto;
@@ -8,7 +7,6 @@
   background-color: #f9f9f9;
 }
 
-/* Header Styles */
 .modern-header {
   display: flex;
   justify-content: space-between;
@@ -65,7 +63,6 @@
   fill: #3498db;
 }
 
-/* Profile Styles */
 .modern-profile {
   position: relative;
 }
@@ -163,7 +160,6 @@
   color: #e74c3c;
 }
 
-/* Content Styles */
 .team-performance-content h2 {
   font-size: 24px;
   margin-bottom: 20px;
@@ -171,7 +167,6 @@
   font-weight: 600;
 }
 
-/* Table Styles */
 .performance-table {
   width: 100%;
   border-collapse: collapse;
@@ -200,18 +195,12 @@
   background-color: #f8f9fa;
 }
 
-.performance-table tfoot td {
-  font-weight: 600;
-  background-color: #f8f9fa;
-}
-
-/* Highlight high scores */
 .performance-table td {
   position: relative;
 }
 
 .performance-table td:not(:first-child):not(:empty)::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -226,27 +215,43 @@
   opacity: 1;
 }
 
-.performance-table tfoot tr:last-child td {
-  background: #fef3c7;
-  color: #92400e;
+.score-current {
+  color: #007bff;
 }
 
-.performance-table th:last-child,
-.performance-table td:last-child {
-  background: #fef3c7;
-  color: #92400e;
-  font-weight: 600;
+.score-projected {
+  color: #28a745;
 }
 
-.performance-table th:nth-last-child(2),
-.performance-table td:nth-last-child(2) {
-  background: #a6d8fa;
-  color: #1e40af;
-  font-weight: 600;
+.score-supervisor {
+  color: #6f42c1;
 }
 
+.score-type-switcher {
+  display: flex;
+  margin: 15px 0;
+  gap: 10px;
+}
 
-/* Responsive Styles */
+.score-type-switcher .switch-btn {
+  padding: 8px 16px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.score-type-switcher .switch-btn.active {
+  background: #9cca0d;
+  color: white;
+}
+
+.score-type-switcher .switch-btn:hover:not(.active) {
+  background: #e0e0e0;
+}
+
 @media (max-width: 768px) {
   .modern-header {
     flex-direction: column;
@@ -254,21 +259,25 @@
     gap: 15px;
     padding-bottom: 20px;
   }
-  
+
   .performance-table {
     display: block;
     overflow-x: auto;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .performance-table th,
   .performance-table td {
     min-width: 100px;
   }
-  
+
   .team-performance-content h2 {
     font-size: 20px;
+  }
+
+  .score-type-switcher {
+    flex-wrap: wrap;
   }
 }
 
@@ -276,28 +285,27 @@
   .team-performance-container {
     padding: 15px;
   }
-  
+
   .profile-container {
     padding: 6px 8px;
   }
-  
+
   .performance-table th,
   .performance-table td {
     padding: 8px 10px;
     font-size: 14px;
   }
-  
+
   .logo-text {
     font-size: 18px;
   }
-  
+
   .dashlink {
     padding: 6px 12px;
     font-size: 14px;
   }
 }
 
-/* Loading and Error States */
 .error-container {
   text-align: center;
   padding: 40px 20px;
@@ -328,30 +336,21 @@
   background-color: #2980b9;
 }
 
-
-
-/* Add this media query if you want to handle it with CSS only */
 @media (max-width: 768px) {
   .modern-logo {
     display: none;
   }
-  
+
   .modern-header {
     justify-content: space-between;
     padding: 15px;
   }
-  
+
   .dashlink {
     margin-left: 0;
   }
 }
 
-
-
-
-
-
-/* Analysis switcher */
 .analysis-switcher {
   display: flex;
   margin: 20px 0;
@@ -371,7 +370,6 @@
   color: white;
 }
 
-/* Performance highlights */
 .performance-highlights {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -383,7 +381,7 @@
   background: white;
   border-radius: 8px;
   padding: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .highlight-card h3 {
@@ -423,7 +421,6 @@
   color: #9cca0d;
 }
 
-/* Trend indicators */
 .positive {
   color: #28a745;
 }
@@ -432,7 +429,6 @@
   color: #dc3545;
 }
 
-/* Analysis sections */
 .analysis-section {
   margin-top: 20px;
 }
@@ -442,8 +438,6 @@
   color: #333;
 }
 
-
-/* Department filter */
 .department-filter {
   margin: 20px 0;
   display: flex;
@@ -466,7 +460,6 @@
   color: #666;
 }
 
-/* No data states */
 .no-data {
   color: #666;
   font-style: italic;

@@ -180,6 +180,21 @@
   transform: scale(1.05);
 }
 
+.back-btn {
+  padding: 0.5rem 1rem;
+  background-color: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.back-btn:hover {
+  background-color: #4a5568;
+  transform: scale(1.05);
+}
+
 .user-info {
   margin-bottom: 1.5rem;
 }

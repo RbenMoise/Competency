@@ -16,7 +16,7 @@ import axios from "axios";
 import "./MainContent.css";
 
 export default function MainContent({ activeSection, allUsers, summary }) {
-  const [showSubmissionsModal, setShowSubmissionsModal] = useState(false);
+  const [viewMode, setViewMode] = useState("list"); // "list" or "submissions"
   const [selectedUser, setSelectedUser] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [submissions, setSubmissions] = useState([]);
@@ -142,10 +142,15 @@ export default function MainContent({ activeSection, allUsers, summary }) {
       ? allUsers.filter((u) => u.role === "employee")
       : allUsers;
 
-  const openSubmissionsModal = (user) => {
+  const openSubmissionsView = (user) => {
     setSelectedUser(user);
     setCurrentPage(1);
-    setShowSubmissionsModal(true);
+    setViewMode("submissions");
+  };
+
+  const goBackToList = () => {
+    setSelectedUser(null);
+    setViewMode("list");
   };
 
   const userSubmissions = selectedUser
@@ -179,7 +184,7 @@ export default function MainContent({ activeSection, allUsers, summary }) {
 
   return (
     <div className="main-content">
-      {activeSection === "overview" && (
+      {activeSection === "overview" && viewMode === "list" && (
         <div className="overview-section">
           <h3>System Overview</h3>
           <p>
@@ -278,150 +283,152 @@ export default function MainContent({ activeSection, allUsers, summary }) {
       )}
       {(activeSection === "users" ||
         activeSection === "supervisors" ||
-        activeSection === "employees") && (
-        <div className="users-section">
-          <h3>
-            {activeSection === "supervisors"
-              ? "Supervisors"
-              : activeSection === "employees"
-              ? "Employees"
-              : "All Users"}
-          </h3>
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Occupation</th>
-                <th>Submissions</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((u) => (
-                <tr key={u._id}>
-                  <td>{u.name || "Unknown"}</td>
-                  <td>{u.email || "-"}</td>
-                  <td>{u.role || "-"}</td>
-                  <td>{u.occupation || "-"}</td>
-                  <td>{u.submissions?.length || 0}</td>
-                  <td>
-                    <button
-                      className="view-btn"
-                      onClick={() => openSubmissionsModal(u)}
-                    >
-                      View
-                    </button>
-                  </td>
+        activeSection === "employees") &&
+        viewMode === "list" && (
+          <div className="users-section">
+            <h3>
+              {activeSection === "supervisors"
+                ? "Supervisors"
+                : activeSection === "employees"
+                ? "Employees"
+                : "All Users"}
+            </h3>
+            <table className="users-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Occupation</th>
+                  <th>Submissions</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {showSubmissionsModal && selectedUser && (
-            <div className="submissions-modal">
-              <h3>Submissions for {selectedUser.name}</h3>
-              <div className="user-info">
-                <p>
-                  <strong>Name:</strong> {selectedUser.name || "Unknown"}
-                </p>
-                <p>
-                  <strong>Email:</strong> {selectedUser.email || "-"}
-                </p>
-                <p>
-                  <strong>Position:</strong> {selectedUser.occupation || "-"}
-                </p>
-                <p>
-                  <strong>Role:</strong> {selectedUser.role || "-"}
-                </p>
-              </div>
-              {userSubmissions.length === 0 ? (
-                <div className="empty-state-card">
-                  <div className="empty-state-content">
-                    <div className="empty-icon">🔍</div>
-                    <h3>No Submissions</h3>
-                    <p>This user has no submissions.</p>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <table className="submissions-table">
-                    <thead>
-                      <tr>
-                        <th>Status</th>
-                        <th>Submitted At</th>
-                        <th>Reviewed By</th>
-                        <th>Reviewed At</th>
-                        <th>Employee Scores</th>
-                        <th>Supervisor Scores</th>
-                        <th>Comments</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentSubmissions.map((sub) => (
-                        <tr key={sub._id}>
-                          <td>
-                            <span
-                              className={`status-badge ${
-                                sub.status?.toLowerCase() || "unknown"
-                              }`}
-                            >
-                              {sub.status || "Unknown"}
-                            </span>
-                          </td>
-                          <td>
-                            {sub.submittedAt
-                              ? new Date(sub.submittedAt).toLocaleString()
-                              : "-"}
-                          </td>
-                          <td>{sub.approvedBy || "-"}</td>
-                          <td>
-                            {sub.approvedAt &&
-                            !isNaN(new Date(sub.approvedAt).getTime())
-                              ? new Date(sub.approvedAt).toLocaleDateString()
-                              : "-"}
-                          </td>
-                          <td>{formatScores(sub.current)}</td>
-                          <td>{formatScores(sub.supervisorAssessment)}</td>
-                          <td>{sub.approvalComments || "-"}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="pagination-controls">
-                    <button
-                      onClick={() => paginate(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="pagination-button"
-                    >
-                      Previous
-                    </button>
-                    <span className="page-info">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      onClick={() => paginate(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="pagination-button"
-                    >
-                      Next
-                    </button>
-                  </div>
-                </>
-              )}
-              <div className="modal-actions">
-                <button
-                  className="cancel-btn"
-                  onClick={() => setShowSubmissionsModal(false)}
-                >
-                  Close
-                </button>
-              </div>
+              </thead>
+              <tbody>
+                {filteredUsers.map((u) => (
+                  <tr key={u._id}>
+                    <td>{u.name || "Unknown"}</td>
+                    <td>{u.email || "-"}</td>
+                    <td>{u.role || "-"}</td>
+                    <td>{u.occupation || "-"}</td>
+                    <td>{u.submissions?.length || 0}</td>
+                    <td>
+                      <button
+                        className="view-btn"
+                        onClick={() => openSubmissionsView(u)}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      {(activeSection === "users" ||
+        activeSection === "supervisors" ||
+        activeSection === "employees") &&
+        viewMode === "submissions" &&
+        selectedUser && (
+          <div className="submissions-modal">
+            <h3>Submissions for {selectedUser.name}</h3>
+            <div className="user-info">
+              <p>
+                <strong>Name:</strong> {selectedUser.name || "Unknown"}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedUser.email || "-"}
+              </p>
+              <p>
+                <strong>Position:</strong> {selectedUser.occupation || "-"}
+              </p>
+              <p>
+                <strong>Role:</strong> {selectedUser.role || "-"}
+              </p>
             </div>
-          )}
-        </div>
-      )}
-      {activeSection === "submissions" && (
+            {userSubmissions.length === 0 ? (
+              <div className="empty-state-card">
+                <div className="empty-state-content">
+                  <div className="empty-icon">🔍</div>
+                  <h3>No Submissions</h3>
+                  <p>This user has no submissions.</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <table className="submissions-table">
+                  <thead>
+                    <tr>
+                      <th>Status</th>
+                      <th>Submitted At</th>
+                      <th>Reviewed By</th>
+                      <th>Reviewed At</th>
+                      <th>Employee Scores</th>
+                      <th>Supervisor Scores</th>
+                      <th>Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentSubmissions.map((sub) => (
+                      <tr key={sub._id}>
+                        <td>
+                          <span
+                            className={`status-badge ${
+                              sub.status?.toLowerCase() || "unknown"
+                            }`}
+                          >
+                            {sub.status || "Unknown"}
+                          </span>
+                        </td>
+                        <td>
+                          {sub.submittedAt
+                            ? new Date(sub.submittedAt).toLocaleString()
+                            : "-"}
+                        </td>
+                        <td>{sub.approvedBy || "-"}</td>
+                        <td>
+                          {sub.approvedAt &&
+                          !isNaN(new Date(sub.appliedAt).getTime())
+                            ? new Date(sub.approvedAt).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td>{formatScores(sub.current)}</td>
+                        <td>{formatScores(sub.supervisorAssessment)}</td>
+                        <td>{sub.approvalComments || "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="pagination-controls">
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="pagination-button"
+                  >
+                    Previous
+                  </button>
+                  <span className="page-info">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="pagination-button"
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
+            )}
+            <div className="modal-actions">
+              <button className="back-btn" onClick={goBackToList}>
+                Back
+              </button>
+            </div>
+          </div>
+        )}
+      {activeSection === "submissions" && viewMode === "list" && (
         <div className="submissions-section">
           <h3>All Submissions</h3>
           <table className="submissions-table">

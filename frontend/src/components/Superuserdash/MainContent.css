@@ -1,0 +1,129 @@
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f8fafc;
+  transition: background-color 0.3s ease;
+}
+
+.overview-section,
+.users-section,
+.submissions-section {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.overview-section:hover,
+.users-section:hover,
+.submissions-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.overview-section h3,
+.users-section h3,
+.submissions-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1a202c;
+}
+
+.overview-section p {
+  font-size: 1rem;
+  color: #4a5568;
+  margin-bottom: 1.5rem;
+}
+
+.summary-chart {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.summary-chart:hover {
+  transform: translateY(-4px);
+}
+
+.modern-bar-chart .recharts-bar-rectangle {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.modern-bar-chart .recharts-cartesian-axis-tick {
+  font-family: "Inter", sans-serif;
+}
+
+.modern-bar-chart .recharts-tooltip-wrapper {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.users-table,
+.submissions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Inter", sans-serif;
+}
+
+.users-table th,
+.users-table td,
+.submissions-table th,
+.submissions-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.users-table th,
+.submissions-table th {
+  background-color: #edf2f7;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.users-table tbody tr:hover,
+.submissions-table tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fff;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.status-badge:hover {
+  transform: scale(1.05);
+}
+
+.status-badge.pending {
+  background-color: #f6ad55;
+}
+
+.status-badge.approved {
+  background-color: #48bb78;
+}
+
+.status-badge.rejected {
+  background-color: #f56565;
+}

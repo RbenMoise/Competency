@@ -2,13 +2,17 @@ import React from "react";
 import {
   BarChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceLine,
+  Cell,
 } from "recharts";
+import "./MainContent.css";
 
 export default function MainContent({
   activeSection,
@@ -45,14 +49,52 @@ export default function MainContent({
             <ResponsiveContainer width="100%" height={300}>
               <BarChart
                 data={chartData}
-                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                margin={{ top: 20, right: 30, left: 10, bottom: 10 }}
+                className="modern-bar-chart"
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: "#333", fontSize: 12 }}
+                  axisLine={{ stroke: "#ccc" }}
+                />
+                <YAxis
+                  tick={{ fill: "#333", fontSize: 12 }}
+                  axisLine={{ stroke: "#ccc" }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+                  }}
+                />
+                <Legend wrapperStyle={{ paddingTop: "10px" }} />
+                <Bar
+                  dataKey="value"
+                  radius={[8, 8, 0, 0]}
+                  barSize={40}
+                  animationDuration={1200}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#8884d8"
+                  strokeWidth={3}
+                  dot={false}
+                  animationDuration={1500}
+                />
+                <ReferenceLine
+                  y={Math.max(...chartData.map((d) => d.value)) * 0.8}
+                  stroke="#dc3545"
+                  strokeDasharray="5 5"
+                  strokeWidth={2}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

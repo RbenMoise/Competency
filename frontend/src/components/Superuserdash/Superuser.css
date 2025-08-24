@@ -1,19 +1,16 @@
 .super-user-container {
   background-color: #f9f9f9;
   min-height: 100vh;
-  padding: 2rem;
   color: #000;
-  margin-left: 13%;
-  margin-right: 13%;
 }
 
 .modern-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2.5rem;
-  padding-bottom: 1rem;
+  padding: 1rem 2rem;
   border-bottom: 1px solid #eee;
+  background-color: #fff;
 }
 
 .modern-logo {
@@ -38,13 +35,25 @@
   color: #000;
 }
 
-.dashlink {
+.header-content {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
+  gap: 2rem;
+}
+
+.summary-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.summary-stats p {
+  margin: 0;
+}
+
+.summary-stats strong {
   color: #000;
-  font-weight: 500;
 }
 
 .modern-profile {
@@ -128,57 +137,50 @@
   color: #d9534f;
 }
 
-h2 {
-  font-size: 1.5rem;
+.dashboard-layout {
+  display: flex;
+  min-height: calc(100vh - 80px);
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #fff;
+  padding: 1.5rem;
+  border-right: 1px solid #eee;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar h3 {
+  font-size: 1.2rem;
   margin-bottom: 1.5rem;
   color: #000;
 }
 
-.summary-section {
-  background-color: #fff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2rem;
-}
-
-.summary-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
-}
-
-.summary-stats p {
-  margin: 0;
-  font-size: 1rem;
-  color: #555;
-}
-
-.summary-stats strong {
-  color: #000;
-}
-
-.actions-section {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.action-button {
+.sidebar-button {
+  width: 100%;
   background-color: #007bff;
   color: #fff;
   border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem;
   border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
+  margin-bottom: 0.5rem;
+  text-align: left;
   transition: background-color 0.3s;
 }
 
-.action-button:hover {
+.sidebar-button:hover {
   background-color: #0056b3;
 }
 
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f9f9f9;
+}
+
+.overview-section,
 .users-section,
 .submissions-section {
   background-color: #fff;
@@ -188,10 +190,18 @@ h2 {
   margin-bottom: 2rem;
 }
 
-h3 {
+.overview-section h3,
+.users-section h3,
+.submissions-section h3 {
   font-size: 1.2rem;
   margin-bottom: 1rem;
   color: #000;
+}
+
+.overview-section p {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 1rem;
 }
 
 .users-table,

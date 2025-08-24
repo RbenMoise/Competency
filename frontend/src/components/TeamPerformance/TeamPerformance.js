@@ -273,7 +273,7 @@ export default function TeamPerformance() {
           ? projectedScores.reduce((sum, score) => sum + score, 0).toFixed(2)
           : 0;
       const supervisorSum =
-        projectedScores.length > 0
+        supervisorScores.length > 0
           ? supervisorScores.reduce((sum, score) => sum + score, 0).toFixed(2)
           : 0;
 
@@ -328,7 +328,7 @@ export default function TeamPerformance() {
       .filter((emp) => emp.average[scoreType] > 0)
       .sort(
         (a, b) =>
-          parseFloat(a.average[scoreType]) - parseFloat(b.average[scoreType])
+          parseFloat(a.average[scoreType]) - parseFloat(a.average[scoreType])
       )
       .slice(0, 3);
   };
@@ -659,23 +659,42 @@ export default function TeamPerformance() {
           <table className="performance-table">
             <thead>
               <tr>
-                <th>Discipline</th>
-                <th>Assessments</th>
-                <th>Min</th>
-                <th>Max</th>
-                <th>Std Dev</th>
-                {scoreType === "all" ? (
-                  <>
-                    <th>Current Avg</th>
-                    <th>Projected Avg</th>
-                    <th>Supervisor Avg</th>
-                  </>
-                ) : (
-                  <th>
-                    {scoreType.charAt(0).toUpperCase() + scoreType.slice(1)} Avg
-                  </th>
-                )}
+                <th rowSpan={scoreType === "all" ? 2 : 1}>Discipline</th>
+                <th rowSpan={scoreType === "all" ? 2 : 1}>Assessments</th>
+                <th rowSpan={scoreType === "all" ? 2 : 1}>Min</th>
+                <th rowSpan={scoreType === "all" ? 2 : 1}>Max</th>
+                <th rowSpan={scoreType === "all" ? 2 : 1}>Std Dev</th>
+                <th colSpan={scoreType === "all" ? 3 : 1}>
+                  Total
+                  {scoreType === "all" && (
+                    <div className="sub-header">
+                      <span className="score-current">C</span>
+                      <span className="score-projected">P</span>
+                      <span className="score-supervisor">S</span>
+                    </div>
+                  )}
+                </th>
+                <th colSpan={scoreType === "all" ? 3 : 1}>
+                  Average
+                  {scoreType === "all" && (
+                    <div className="sub-header">
+                      <span className="score-current">C</span>
+                      <span className="score-projected">P</span>
+                      <span className="score-supervisor">S</span>
+                    </div>
+                  )}
+                </th>
               </tr>
+              {scoreType === "all" && (
+                <tr>
+                  <th className="sub-column score-current">Current</th>
+                  <th className="sub-column score-projected">Projected</th>
+                  <th className="sub-column score-supervisor">Supervisor</th>
+                  <th className="sub-column score-current">Current</th>
+                  <th className="sub-column score-projected">Projected</th>
+                  <th className="sub-column score-supervisor">Supervisor</th>
+                </tr>
+              )}
             </thead>
             <tbody>
               {Object.entries(disciplineData).length > 0 ? (
@@ -688,26 +707,43 @@ export default function TeamPerformance() {
                     <td>{data.stdDev}</td>
                     {scoreType === "all" ? (
                       <>
-                        <td className="score-current">
+                        <td className="sub-column score-current">
+                          {data.sum.current}
+                        </td>
+                        <td className="sub-column score-projected">
+                          {data.sum.projected}
+                        </td>
+                        <td className="sub-column score-supervisor">
+                          {data.sum.supervisor}
+                        </td>
+                        <td className="sub-column score-current">
                           {data.average.current}
                         </td>
-                        <td className="score-projected">
+                        <td className="sub-column score-projected">
                           {data.average.projected}
                         </td>
-                        <td className="score-supervisor">
+                        <td className="sub-column score-supervisor">
                           {data.average.supervisor}
                         </td>
                       </>
                     ) : (
-                      <td className={`score-${scoreType}`}>
-                        {data.average[scoreType]}
-                      </td>
+                      <>
+                        <td className={`score-${scoreType}`}>
+                          {data.sum[scoreType]}
+                        </td>
+                        <td className={`score-${scoreType}`}>
+                          {data.average[scoreType]}
+                        </td>
+                      </>
                     )}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={scoreType === "all" ? 8 : 6} className="no-data">
+                  <td
+                    colSpan={scoreType === "all" ? 11 : 7}
+                    className="no-data"
+                  >
                     No discipline data available for this department
                   </td>
                 </tr>

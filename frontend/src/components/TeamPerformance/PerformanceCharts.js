@@ -69,25 +69,35 @@ const PerformanceCharts = ({
       employeeData,
       disciplineData,
       analysisMode,
+      scoreType,
     });
     let data;
     if (analysisMode === "employee") {
-      data = Object.values(employeeData || {}).map((emp) => ({
-        name: emp.name?.split(" ")[0] || "Unknown",
-        Current: emp.average?.current || 0,
-        Projected: emp.average?.projected || 0,
-        Supervisor: emp.average?.supervisor || 0,
-      }));
+      data = Object.values(employeeData || {}).map((emp) => {
+        const scores = emp.average || {};
+        return {
+          name: emp.name?.split(" ")[0] || "Unknown",
+          Current: Number(scores.current) || 0,
+          Projected: Number(scores.projected) || 0,
+          Supervisor: Number(scores.supervisor) || 0,
+        };
+      });
     } else {
-      data = disciplines.map((disc) => ({
-        name: disc,
-        Current: disciplineData?.[disc]?.average?.current || 0,
-        Projected: disciplineData?.[disc]?.average?.projected || 0,
-        Supervisor: disciplineData?.[disc]?.average?.supervisor || 0,
-      }));
+      data = disciplines.map((disc) => {
+        const scores = disciplineData?.[disc]?.average || {};
+        return {
+          name: disc,
+          Current: Number(scores.current) || 0,
+          Projected: Number(scores.projected) || 0,
+          Supervisor: Number(scores.supervisor) || 0,
+        };
+      });
     }
     // Fallback data if empty
-    if (!data.length) {
+    if (
+      !data.length ||
+      data.every((d) => !d.Current && !d.Projected && !d.Supervisor)
+    ) {
       data = [{ name: "No Data", Current: 0, Projected: 0, Supervisor: 0 }];
     }
     console.log("BarChart data:", data);
@@ -249,10 +259,7 @@ const PerformanceCharts = ({
       <ResponsiveContainer width="100%" height={400}>
         <RadarChart data={data}>
           <PolarGrid />
-          <PolarAngleAxis
-            dataKey="discipline"
-            tick={{ angle: -90, textAnchor: "end", dy: -5 }}
-          />
+          <PolarAngleAxis dataKey="discipline" />
           <PolarRadiusAxis domain={[0, 5]} />
           {series.map((key, index) => (
             <Radar

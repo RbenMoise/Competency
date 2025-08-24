@@ -11,6 +11,11 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   Cell,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
 } from "recharts";
 import axios from "axios";
 import "./MainContent.css";
@@ -24,6 +29,18 @@ export default function MainContent({ activeSection, allUsers, summary }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const itemsPerPage = 5;
+
+  const categories = [
+    "Geology",
+    "Geophysics",
+    "Geochemistry",
+    "Petroleum Engineering",
+    "Project Management",
+    "Renewable Energy",
+    "Field Work",
+    "Reporting",
+    "Data Management",
+  ];
 
   const formatScores = (scores) => {
     if (!scores || typeof scores !== "object") return "No assessment";
@@ -174,6 +191,15 @@ export default function MainContent({ activeSection, allUsers, summary }) {
             : latest
         )
       : null;
+
+  const radarData = latestSubmission
+    ? categories.map((cat) => ({
+        category: cat,
+        current: latestSubmission.current?.[cat] || 0,
+        projected: latestSubmission.projected?.[cat] || 0,
+        supervisor: latestSubmission.supervisorAssessment?.[cat] || 0,
+      }))
+    : [];
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -447,7 +473,8 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                 <table className="submissions-table">
                   <thead>
                     <tr>
-                      <th>Employee Scores</th>
+                      <th>Current Scores</th>
+                      <th>Projected Scores</th>
                       <th>Supervisor Scores</th>
                     </tr>
                   </thead>
@@ -455,6 +482,7 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                     {currentSubmissions.map((sub) => (
                       <tr key={sub._id}>
                         <td>{formatScores(sub.current)}</td>
+                        <td>{formatScores(sub.projected)}</td>
                         <td>{formatScores(sub.supervisorAssessment)}</td>
                       </tr>
                     ))}
@@ -481,12 +509,64 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                 </div>
               </>
             ) : (
-              <div className="empty-state-card">
-                <div className="empty-state-content">
-                  <div className="empty-icon">📊</div>
-                  <h3>Spider Chart Coming Soon</h3>
-                  <p>Spider chart visualization will be implemented later.</p>
-                </div>
+              <div className="spider-chart-wrapper">
+                {radarData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={400}>
+                    <RadarChart data={radarData}>
+                      <PolarGrid stroke="#e0e0e0" />
+                      <PolarAngleAxis
+                        dataKey="category"
+                        tick={{
+                          fill: "#333",
+                          fontSize: 12,
+                          fontFamily: "Inter, sans-serif",
+                        }}
+                      />
+                      <PolarRadiusAxis
+                        domain={[0, 5]}
+                        tick={{ fill: "#333", fontSize: 12 }}
+                      />
+                      <Radar
+                        name="Current Scores"
+                        dataKey="current"
+                        stroke="#007bff"
+                        fill="#007bff"
+                        fillOpacity={0.3}
+                      />
+                      <Radar
+                        name="Projected Scores"
+                        dataKey="projected"
+                        stroke="#28a745"
+                        fill="#28a745"
+                        fillOpacity={0.3}
+                      />
+                      <Radar
+                        name="Supervisor Scores"
+                        dataKey="supervisor"
+                        stroke="#6f42c1"
+                        fill="#6f42c1"
+                        fillOpacity={0.3}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "#fff",
+                          border: "1px solid #ccc",
+                          borderRadius: "8px",
+                          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+                        }}
+                      />
+                      <Legend wrapperStyle={{ paddingTop: "10px" }} />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="empty-state-card">
+                    <div className="empty-state-content">
+                      <div className="empty-icon">📊</div>
+                      <h3>No Scores Available</h3>
+                      <p>No scores available for visualization.</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             <div className="modal-actions">
@@ -507,7 +587,8 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                 <th>Submitted At</th>
                 <th>Reviewed By</th>
                 <th>Reviewed At</th>
-                <th>Employee Scores</th>
+                <th>Current Scores</th>
+                <th>Projected Scores</th>
                 <th>Supervisor Scores</th>
               </tr>
             </thead>
@@ -528,6 +609,7 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                   <td>{sub.approvedBy || "-"}</td>
                   <td>{formatDate(sub.approvedAt)}</td>
                   <td>{formatScores(sub.current)}</td>
+                  <td>{formatScores(sub.projected)}</td>
                   <td>{formatScores(sub.supervisorAssessment)}</td>
                 </tr>
               ))}

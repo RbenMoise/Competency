@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -27,7 +27,7 @@ export default function MainContent({
       .join(", ");
   };
 
-  const chartData = [
+  const fullChartData = [
     { name: "Total Users", value: summary.totalUsers, fill: "#007bff" },
     { name: "Employees", value: summary.employees, fill: "#17a2b8" },
     { name: "Supervisors", value: summary.supervisors, fill: "#6f42c1" },
@@ -35,6 +35,29 @@ export default function MainContent({
     { name: "Approved", value: summary.approved, fill: "#28a745" },
     { name: "Rejected", value: summary.rejected, fill: "#dc3545" },
   ];
+
+  const [chartData, setChartData] = useState([]);
+  const [animationStep, setAnimationStep] = useState(0);
+
+  useEffect(() => {
+    if (activeSection === "overview") {
+      setChartData([]); // Reset chart data
+      setAnimationStep(0); // Reset animation
+
+      const interval = setInterval(() => {
+        setAnimationStep((prev) => {
+          if (prev < fullChartData.length) {
+            setChartData(fullChartData.slice(0, prev + 1));
+            return prev + 1;
+          }
+          clearInterval(interval);
+          return prev;
+        });
+      }, 500); // Add one data point every 500ms
+
+      return () => clearInterval(interval);
+    }
+  }, [activeSection, summary]);
 
   return (
     <div className="main-content">
@@ -86,11 +109,12 @@ export default function MainContent({
                   dataKey="value"
                   stroke="#8884d8"
                   strokeWidth={3}
-                  dot={false}
+                  dot={{ r: 5, fill: "#8884d8" }}
                   animationDuration={1500}
+                  animationEasing="ease-in-out"
                 />
                 <ReferenceLine
-                  y={Math.max(...chartData.map((d) => d.value)) * 0.8}
+                  y={Math.max(...fullChartData.map((d) => d.value)) * 0.8}
                   stroke="#dc3545"
                   strokeDasharray="5 5"
                   strokeWidth={2}
@@ -157,7 +181,7 @@ export default function MainContent({
                   <td>{sub.approvedBy || "-"}</td>
                   <td>
                     {sub.approvedAt
-                      ? new Date(sub.approvedAt).toLocaleDateString()
+                      ? new Date(sub.appliedAt).toLocaleDateString()
                       : "-"}
                   </td>
                   <td>{formatScores(sub.current)}</td>

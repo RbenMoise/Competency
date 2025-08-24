@@ -52,15 +52,20 @@
 }
 
 .modern-bar-chart .recharts-bar-rectangle {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
 }
 
 .modern-bar-chart .recharts-cartesian-axis-tick {
   font-family: "Inter", sans-serif;
+  font-size: 12px;
 }
 
 .modern-bar-chart .recharts-tooltip-wrapper {
   animation: fadeIn 0.3s ease-in-out;
+}
+
+.modern-bar-chart .recharts-line {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
 }
 
 @keyframes fadeIn {

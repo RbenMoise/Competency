@@ -1,4 +1,14 @@
 import React from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 export default function MainContent({
   activeSection,
@@ -13,16 +23,14 @@ export default function MainContent({
       .join(", ");
   };
 
-  const maxBarHeight = 100; // Max height for SVG bars
-  const maxValue =
-    Math.max(
-      summary.totalUsers,
-      summary.employees,
-      summary.supervisors,
-      summary.pending,
-      summary.approved,
-      summary.rejected
-    ) || 1; // Prevent division by zero
+  const chartData = [
+    { name: "Total Users", value: summary.totalUsers, fill: "#007bff" },
+    { name: "Employees", value: summary.employees, fill: "#17a2b8" },
+    { name: "Supervisors", value: summary.supervisors, fill: "#6f42c1" },
+    { name: "Pending", value: summary.pending, fill: "#ffc107" },
+    { name: "Approved", value: summary.approved, fill: "#28a745" },
+    { name: "Rejected", value: summary.rejected, fill: "#dc3545" },
+  ];
 
   return (
     <div className="main-content">
@@ -33,85 +41,20 @@ export default function MainContent({
             Welcome to the Super User Dashboard. Manage all users and
             submissions.
           </p>
-          <div className="summary-tiles">
-            <div className="tile">
-              <h4>Total Users</h4>
-              <div className="tile-value">{summary.totalUsers}</div>
-              <svg width="50" height="120">
-                <rect
-                  x="10"
-                  y={120 - (summary.totalUsers / maxValue) * maxBarHeight}
-                  width="30"
-                  height={(summary.totalUsers / maxValue) * maxBarHeight}
-                  fill="#007bff"
-                />
-              </svg>
-            </div>
-            <div className="tile">
-              <h4>Employees</h4>
-              <div className="tile-value">{summary.employees}</div>
-              <svg width="50" height="120">
-                <rect
-                  x="10"
-                  y={120 - (summary.employees / maxValue) * maxBarHeight}
-                  width="30"
-                  height={(summary.employees / maxValue) * maxBarHeight}
-                  fill="#17a2b8"
-                />
-              </svg>
-            </div>
-            <div className="tile">
-              <h4>Supervisors</h4>
-              <div className="tile-value">{summary.supervisors}</div>
-              <svg width="50" height="120">
-                <rect
-                  x="10"
-                  y={120 - (summary.supervisors / maxValue) * maxBarHeight}
-                  width="30"
-                  height={(summary.supervisors / maxValue) * maxBarHeight}
-                  fill="#6f42c1"
-                />
-              </svg>
-            </div>
-            <div className="tile">
-              <h4>Pending</h4>
-              <div className="tile-value">{summary.pending}</div>
-              <svg width="50" height="120">
-                <rect
-                  x="10"
-                  y={120 - (summary.pending / maxValue) * maxBarHeight}
-                  width="30"
-                  height={(summary.pending / maxValue) * maxBarHeight}
-                  fill="#ffc107"
-                />
-              </svg>
-            </div>
-            <div className="tile">
-              <h4>Approved</h4>
-              <div className="tile-value">{summary.approved}</div>
-              <svg width="50" height="120">
-                <rect
-                  x="10"
-                  y={120 - (summary.approved / maxValue) * maxBarHeight}
-                  width="30"
-                  height={(summary.approved / maxValue) * maxBarHeight}
-                  fill="#28a745"
-                />
-              </svg>
-            </div>
-            <div className="tile">
-              <h4>Rejected</h4>
-              <div className="tile-value">{summary.rejected}</div>
-              <svg width="50" height="120">
-                <rect
-                  x="10"
-                  y={120 - (summary.rejected / maxValue) * maxBarHeight}
-                  width="30"
-                  height={(summary.rejected / maxValue) * maxBarHeight}
-                  fill="#dc3545"
-                />
-              </svg>
-            </div>
+          <div className="summary-chart">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart
+                data={chartData}
+                margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       )}

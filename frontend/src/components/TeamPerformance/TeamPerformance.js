@@ -4,6 +4,7 @@ import axios from "axios";
 import LOGO from "../../assets/nock j.png";
 import LoadingSpinner from "../SupDash/Loading Spinner";
 import AuthContext from "../context/AuthContext";
+import PerformanceCharts from "./PerformanceCharts";
 import "./TeamPerformance.css";
 
 export default function TeamPerformance() {
@@ -13,11 +14,15 @@ export default function TeamPerformance() {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isChartsDropdownOpen, setIsChartsDropdownOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [analysisMode, setAnalysisMode] = useState("discipline");
   const [selectedDepartment, setSelectedDepartment] = useState("All");
-  const [scoreType, setScoreType] = useState("current"); // current, projected, supervisor, or all
+  const [scoreType, setScoreType] = useState("current");
+  const [chartType, setChartType] = useState(null);
+  const [showChart, setShowChart] = useState(false);
   const dropdownRef = useRef(null);
+  const chartsDropdownRef = useRef(null);
   const navigate = useNavigate();
 
   const departments = {
@@ -54,8 +59,30 @@ export default function TeamPerformance() {
     ],
   };
 
+  const chartTypes = [
+    { value: "spider", label: "Spider Chart" },
+    { value: "bar", label: "Bar Chart" },
+    { value: "stackedBar", label: "Stacked Bar Chart" },
+    { value: "line", label: "Line Chart" },
+    { value: "box", label: "Box Plot" },
+  ];
+
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const toggleChartsDropdown = () => {
+    setIsChartsDropdownOpen(!isChartsDropdownOpen);
+  };
+
+  const selectChartType = (type) => {
+    setChartType(type);
+    setShowChart(true);
+    setIsChartsDropdownOpen(false);
+  };
+
+  const toggleChartVisibility = () => {
+    setShowChart(!showChart);
   };
 
   useEffect(() => {
@@ -122,6 +149,12 @@ export default function TeamPerformance() {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+      }
+      if (
+        chartsDropdownRef.current &&
+        !chartsDropdownRef.current.contains(event.target)
+      ) {
+        setIsChartsDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -328,7 +361,7 @@ export default function TeamPerformance() {
       .filter((emp) => emp.average[scoreType] > 0)
       .sort(
         (a, b) =>
-          parseFloat(a.average[scoreType]) - parseFloat(a.average[scoreType])
+          parseFloat(a.average[scoreType]) - parseFloat(b.average[scoreType])
       )
       .slice(0, 3);
   };
@@ -618,12 +651,13 @@ export default function TeamPerformance() {
         </div>
       </div>
 
-      {analysisMode === "discipline" ? (
-        <div className="analysis-section">
-          <h3>
-            Discipline Performance Breakdown{" "}
-            {selectedDepartment !== "All" && `for ${selectedDepartment}`}
-          </h3>
+      <div className="analysis-section">
+        <h3>
+          {analysisMode === "discipline" ? "Discipline" : "Employee"}{" "}
+          Performance Breakdown{" "}
+          {selectedDepartment !== "All" && `for ${selectedDepartment}`}
+        </h3>
+        <div className="controls-container">
           <div className="score-type-switcher">
             <button
               className={`switch-btn ${
@@ -656,6 +690,42 @@ export default function TeamPerformance() {
               All
             </button>
           </div>
+          <div className="charts-selector" ref={chartsDropdownRef}>
+            <button className="charts-btn" onClick={toggleChartsDropdown}>
+              {showChart ? "Hide Charts" : "Show Charts"} ▼
+            </button>
+            <div
+              className={`charts-dropdown ${
+                isChartsDropdownOpen ? "open" : ""
+              }`}
+            >
+              {chartTypes.map((chart) => (
+                <div
+                  key={chart.value}
+                  className="chart-item"
+                  onClick={() => selectChartType(chart.value)}
+                >
+                  {chart.label}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        {showChart && chartType && (
+          <div className="chart-container">
+            <PerformanceCharts
+              chartType={chartType}
+              analysisMode={analysisMode}
+              scoreType={scoreType}
+              employeeData={employeeData}
+              disciplineData={disciplineData}
+              disciplines={disciplines}
+              selectedDepartment={selectedDepartment}
+              submissions={filteredSubmissions}
+            />
+          </div>
+        )}
+        {analysisMode === "discipline" ? (
           <table className="performance-table">
             <thead>
               <tr>
@@ -750,45 +820,7 @@ export default function TeamPerformance() {
               )}
             </tbody>
           </table>
-        </div>
-      ) : (
-        <div className="analysis-section">
-          <h3>
-            Employee Performance Breakdown{" "}
-            {selectedDepartment !== "All" && `for ${selectedDepartment}`}
-          </h3>
-          <div className="score-type-switcher">
-            <button
-              className={`switch-btn ${
-                scoreType === "current" ? "active" : ""
-              }`}
-              onClick={() => setScoreType("current")}
-            >
-              Current
-            </button>
-            <button
-              className={`switch-btn ${
-                scoreType === "projected" ? "active" : ""
-              }`}
-              onClick={() => setScoreType("projected")}
-            >
-              Projected
-            </button>
-            <button
-              className={`switch-btn ${
-                scoreType === "supervisor" ? "active" : ""
-              }`}
-              onClick={() => setScoreType("supervisor")}
-            >
-              Supervisor
-            </button>
-            <button
-              className={`switch-btn ${scoreType === "all" ? "active" : ""}`}
-              onClick={() => setScoreType("all")}
-            >
-              All
-            </button>
-          </div>
+        ) : (
           <table className="performance-table">
             <thead>
               <tr>
@@ -923,8 +955,8 @@ export default function TeamPerformance() {
               )}
             </tbody>
           </table>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

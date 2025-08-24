@@ -28,12 +28,42 @@ export default function MainContent({
   };
 
   const fullChartData = [
-    { name: "Total Users", value: summary.totalUsers, fill: "#007bff" },
-    { name: "Employees", value: summary.employees, fill: "#17a2b8" },
-    { name: "Supervisors", value: summary.supervisors, fill: "#6f42c1" },
-    { name: "Pending", value: summary.pending, fill: "#ffc107" },
-    { name: "Approved", value: summary.approved, fill: "#28a745" },
-    { name: "Rejected", value: summary.rejected, fill: "#dc3545" },
+    {
+      name: "Total Users",
+      value: summary.totalUsers || 0,
+      midValue: (summary.totalUsers || 0) * 0.5,
+      fill: "#007bff",
+    },
+    {
+      name: "Employees",
+      value: summary.employees || 0,
+      midValue: (summary.employees || 0) * 0.5,
+      fill: "#17a2b8",
+    },
+    {
+      name: "Supervisors",
+      value: summary.supervisors || 0,
+      midValue: (summary.supervisors || 0) * 0.5,
+      fill: "#6f42c1",
+    },
+    {
+      name: "Pending",
+      value: summary.pending || 0,
+      midValue: (summary.pending || 0) * 0.5,
+      fill: "#ffc107",
+    },
+    {
+      name: "Approved",
+      value: summary.approved || 0,
+      midValue: (summary.approved || 0) * 0.5,
+      fill: "#28a745",
+    },
+    {
+      name: "Rejected",
+      value: summary.rejected || 0,
+      midValue: (summary.rejected || 0) * 0.5,
+      fill: "#dc3545",
+    },
   ];
 
   const [chartData, setChartData] = useState([]);
@@ -58,6 +88,13 @@ export default function MainContent({
       return () => clearInterval(interval);
     }
   }, [activeSection, summary]);
+
+  const filteredUsers =
+    activeSection === "supervisors"
+      ? allUsers.filter((u) => u.role === "supervisor")
+      : activeSection === "employees"
+      ? allUsers.filter((u) => u.role === "employee")
+      : allUsers;
 
   return (
     <div className="main-content">
@@ -106,12 +143,24 @@ export default function MainContent({
                 </Bar>
                 <Line
                   type="monotone"
-                  dataKey="value"
-                  stroke="#8884d8"
-                  strokeWidth={3}
-                  dot={{ r: 5, fill: "#8884d8" }}
-                  animationDuration={1500}
+                  dataKey="midValue"
+                  stroke="url(#lineGradient)"
+                  strokeWidth={4}
+                  dot={{
+                    r: 6,
+                    fill: "#ffffff",
+                    stroke: "url(#dotGradient)",
+                    strokeWidth: 2,
+                  }}
+                  activeDot={{
+                    r: 8,
+                    fill: "#ffffff",
+                    stroke: "#4c51bf",
+                    strokeWidth: 2,
+                  }}
+                  animationDuration={2500}
                   animationEasing="ease-in-out"
+                  className="animated-line"
                 />
                 <ReferenceLine
                   y={Math.max(...fullChartData.map((d) => d.value)) * 0.8}
@@ -119,14 +168,44 @@ export default function MainContent({
                   strokeDasharray="5 5"
                   strokeWidth={2}
                 />
+                <defs>
+                  <linearGradient
+                    id="lineGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
+                    <stop offset="0%" stopColor="#4c51bf" stopOpacity={0.8} />
+                    <stop offset="100%" stopColor="#9f7aea" stopOpacity={0.8} />
+                  </linearGradient>
+                  <linearGradient
+                    id="dotGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
+                    <stop offset="0%" stopColor="#4c51bf" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#9f7aea" stopOpacity={1} />
+                  </linearGradient>
+                </defs>
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       )}
-      {activeSection === "users" && (
+      {(activeSection === "users" ||
+        activeSection === "supervisors" ||
+        activeSection === "employees") && (
         <div className="users-section">
-          <h3>All Users</h3>
+          <h3>
+            {activeSection === "supervisors"
+              ? "Supervisors"
+              : activeSection === "employees"
+              ? "Employees"
+              : "All Users"}
+          </h3>
           <table className="users-table">
             <thead>
               <tr>
@@ -138,13 +217,13 @@ export default function MainContent({
               </tr>
             </thead>
             <tbody>
-              {allUsers.map((u) => (
+              {filteredUsers.map((u) => (
                 <tr key={u._id}>
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>{u.role}</td>
-                  <td>{u.occupation}</td>
-                  <td>{u.submissions.length}</td>
+                  <td>{u.name || "Unknown"}</td>
+                  <td>{u.email || "-"}</td>
+                  <td>{u.role || "-"}</td>
+                  <td>{u.occupation || "-"}</td>
+                  <td>{u.submissions?.length || 0}</td>
                 </tr>
               ))}
             </tbody>
@@ -169,19 +248,26 @@ export default function MainContent({
             <tbody>
               {submissions.map((sub) => (
                 <tr key={sub._id}>
-                  <td>{sub.submitter.name}</td>
+                  <td>{sub.submitter?.name || "Unknown"}</td>
                   <td>
                     <span
-                      className={`status-badge ${sub.status.toLowerCase()}`}
+                      className={`status-badge ${
+                        sub.status?.toLowerCase() || "unknown"
+                      }`}
                     >
-                      {sub.status}
+                      {sub.status || "Unknown"}
                     </span>
                   </td>
-                  <td>{new Date(sub.submittedAt).toLocaleString()}</td>
+                  <td>
+                    {sub.submittedAt
+                      ? new Date(sub.submittedAt).toLocaleString()
+                      : "-"}
+                  </td>
                   <td>{sub.approvedBy || "-"}</td>
                   <td>
-                    {sub.approvedAt
-                      ? new Date(sub.appliedAt).toLocaleDateString()
+                    {sub.approvedAt &&
+                    !isNaN(new Date(sub.approvedAt).getTime())
+                      ? new Date(sub.approvedAt).toLocaleDateString()
                       : "-"}
                   </td>
                   <td>{formatScores(sub.current)}</td>

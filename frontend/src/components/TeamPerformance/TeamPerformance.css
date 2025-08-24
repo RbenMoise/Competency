@@ -179,8 +179,14 @@
 .performance-table th,
 .performance-table td {
   padding: 12px 15px;
-  text-align: left;
+  text-align: center;
   border-bottom: 1px solid #eaeaea;
+  border-right: 1px solid #eaeaea;
+}
+
+.performance-table th:last-child,
+.performance-table td:last-child {
+  border-right: none;
 }
 
 .performance-table th {
@@ -227,6 +233,19 @@
   color: #6f42c1;
 }
 
+.sub-header {
+  display: flex;
+  justify-content: space-around;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.sub-column {
+  padding: 8px;
+  min-width: 50px;
+}
+
 .score-type-switcher {
   display: flex;
   margin: 15px 0;
@@ -269,7 +288,11 @@
 
   .performance-table th,
   .performance-table td {
-    min-width: 100px;
+    min-width: 80px;
+  }
+
+  .sub-column {
+    min-width: 60px;
   }
 
   .team-performance-content h2 {
@@ -294,6 +317,11 @@
   .performance-table td {
     padding: 8px 10px;
     font-size: 14px;
+  }
+
+  .sub-column {
+    padding: 6px;
+    font-size: 12px;
   }
 
   .logo-text {

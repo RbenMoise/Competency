@@ -273,7 +273,7 @@ export default function TeamPerformance() {
           ? projectedScores.reduce((sum, score) => sum + score, 0).toFixed(2)
           : 0;
       const supervisorSum =
-        supervisorScores.length > 0
+        projectedScores.length > 0
           ? supervisorScores.reduce((sum, score) => sum + score, 0).toFixed(2)
           : 0;
 
@@ -756,14 +756,60 @@ export default function TeamPerformance() {
           <table className="performance-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Position</th>
+                <th rowSpan={scoreType === "all" ? 2 : 1}>Name</th>
+                <th rowSpan={scoreType === "all" ? 2 : 1}>Position</th>
                 {disciplines.map((disc) => (
-                  <th key={disc}>{disc}</th>
+                  <th key={disc} colSpan={scoreType === "all" ? 3 : 1}>
+                    {disc}
+                    {scoreType === "all" && (
+                      <div className="sub-header">
+                        <span className="score-current">C</span>
+                        <span className="score-projected">P</span>
+                        <span className="score-supervisor">S</span>
+                      </div>
+                    )}
+                  </th>
                 ))}
-                <th>Total</th>
-                <th>Average</th>
+                <th colSpan={scoreType === "all" ? 3 : 1}>
+                  Total
+                  {scoreType === "all" && (
+                    <div className="sub-header">
+                      <span className="score-current">C</span>
+                      <span className="score-projected">P</span>
+                      <span className="score-supervisor">S</span>
+                    </div>
+                  )}
+                </th>
+                <th colSpan={scoreType === "all" ? 3 : 1}>
+                  Average
+                  {scoreType === "all" && (
+                    <div className="sub-header">
+                      <span className="score-current">C</span>
+                      <span className="score-projected">P</span>
+                      <span className="score-supervisor">S</span>
+                    </div>
+                  )}
+                </th>
               </tr>
+              {scoreType === "all" && (
+                <tr>
+                  {disciplines.map((disc) => (
+                    <React.Fragment key={disc}>
+                      <th className="sub-column score-current">Current</th>
+                      <th className="sub-column score-projected">Projected</th>
+                      <th className="sub-column score-supervisor">
+                        Supervisor
+                      </th>
+                    </React.Fragment>
+                  ))}
+                  <th className="sub-column score-current">Current</th>
+                  <th className="sub-column score-projected">Projected</th>
+                  <th className="sub-column score-supervisor">Supervisor</th>
+                  <th className="sub-column score-current">Current</th>
+                  <th className="sub-column score-projected">Projected</th>
+                  <th className="sub-column score-supervisor">Supervisor</th>
+                </tr>
+              )}
             </thead>
             <tbody>
               {Object.values(employeeData).length > 0 ? (
@@ -772,30 +818,69 @@ export default function TeamPerformance() {
                     <td>{emp.name}</td>
                     <td>{emp.occupation}</td>
                     {disciplines.map((disc) => (
-                      <td
-                        key={disc}
-                        className={
-                          scoreType === "all" ? "" : `score-${scoreType}`
-                        }
-                      >
-                        {scoreType === "all"
-                          ? `${emp.scores.current[disc] || "-"} / ${
-                              emp.scores.projected[disc] || "-"
-                            } / ${emp.scores.supervisor[disc] || "-"}`
-                          : emp.scores[scoreType][disc] || "-"}
-                      </td>
+                      <React.Fragment key={disc}>
+                        {scoreType === "all" ? (
+                          <>
+                            <td className="sub-column score-current">
+                              {emp.scores.current[disc] || "-"}
+                            </td>
+                            <td className="sub-column score-projected">
+                              {emp.scores.projected[disc] || "-"}
+                            </td>
+                            <td className="sub-column score-supervisor">
+                              {emp.scores.supervisor[disc] || "-"}
+                            </td>
+                          </>
+                        ) : (
+                          <td className={`score-${scoreType}`}>
+                            {emp.scores[scoreType][disc] || "-"}
+                          </td>
+                        )}
+                      </React.Fragment>
                     ))}
-                    <td className={`score-${scoreType}`}>
-                      {emp.total[scoreType]}
-                    </td>
-                    <td className={`score-${scoreType}`}>
-                      {emp.average[scoreType]}
-                    </td>
+                    {scoreType === "all" ? (
+                      <>
+                        <td className="sub-column score-current">
+                          {emp.total.current}
+                        </td>
+                        <td className="sub-column score-projected">
+                          {emp.total.projected}
+                        </td>
+                        <td className="sub-column score-supervisor">
+                          {emp.total.supervisor}
+                        </td>
+                        <td className="sub-column score-current">
+                          {emp.average.current}
+                        </td>
+                        <td className="sub-column score-projected">
+                          {emp.average.projected}
+                        </td>
+                        <td className="sub-column score-supervisor">
+                          {emp.average.supervisor}
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className={`score-${scoreType}`}>
+                          {emp.total[scoreType]}
+                        </td>
+                        <td className={`score-${scoreType}`}>
+                          {emp.average[scoreType]}
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5 + disciplines.length} className="no-data">
+                  <td
+                    colSpan={
+                      scoreType === "all"
+                        ? 2 + disciplines.length * 3 + 6
+                        : 5 + disciplines.length
+                    }
+                    className="no-data"
+                  >
                     No employee data available for this department
                   </td>
                 </tr>

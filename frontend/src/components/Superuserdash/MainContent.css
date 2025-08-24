@@ -108,7 +108,8 @@
 }
 
 .users-table,
-.submissions-table {
+.submissions-table,
+.nested-scores-table {
   width: 100%;
   border-collapse: collapse;
   font-family: "Inter", sans-serif;
@@ -117,22 +118,54 @@
 .users-table th,
 .users-table td,
 .submissions-table th,
-.submissions-table td {
-  padding: 1rem;
+.submissions-table td,
+.nested-scores-table th,
+.nested-scores-table td {
+  padding: 0.75rem;
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
 }
 
 .users-table th,
-.submissions-table th {
+.submissions-table th,
+.nested-scores-table th {
   background-color: #edf2f7;
   font-weight: 600;
   color: #2d3748;
 }
 
+.nested-scores-table th:not(:first-child),
+.nested-scores-table td:not(:first-child) {
+  text-align: center;
+}
+
 .users-table tbody tr:hover,
-.submissions-table tbody tr:hover {
+.submissions-table tbody tr:hover,
+.nested-scores-table tbody tr:hover {
   background-color: #f7fafc;
+}
+
+.score-current {
+  color: #007bff;
+}
+
+.score-projected {
+  color: #28a745;
+}
+
+.score-supervisor {
+  color: #6f42c1;
+}
+
+.submission-entry {
+  margin-bottom: 1.5rem;
+}
+
+.submission-entry h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin-bottom: 0.75rem;
 }
 
 .status-badge {

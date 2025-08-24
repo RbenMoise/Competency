@@ -42,11 +42,8 @@ export default function MainContent({ activeSection, allUsers, summary }) {
     "Data Management",
   ];
 
-  const formatScores = (scores) => {
-    if (!scores || typeof scores !== "object") return "No assessment";
-    return Object.entries(scores)
-      .map(([key, value]) => `${key}: ${value}`)
-      .join(", ");
+  const formatScore = (score) => {
+    return score !== undefined && score !== null ? score : "-";
   };
 
   const formatDate = (date) => {
@@ -470,24 +467,39 @@ export default function MainContent({ activeSection, allUsers, summary }) {
               </div>
             ) : subViewMode === "scores" ? (
               <>
-                <table className="submissions-table">
-                  <thead>
-                    <tr>
-                      <th>Current Scores</th>
-                      <th>Projected Scores</th>
-                      <th>Supervisor Scores</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentSubmissions.map((sub) => (
-                      <tr key={sub._id}>
-                        <td>{formatScores(sub.current)}</td>
-                        <td>{formatScores(sub.projected)}</td>
-                        <td>{formatScores(sub.supervisorAssessment)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {currentSubmissions.map((sub, index) => (
+                  <div key={sub._id} className="submission-entry">
+                    <h4>
+                      Submission {index + 1 + (currentPage - 1) * itemsPerPage}{" "}
+                    </h4>
+                    <table className="nested-scores-table">
+                      <thead>
+                        <tr>
+                          <th>Category</th>
+                          <th>Current</th>
+                          <th>Projected</th>
+                          <th>Supervisor</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {categories.map((cat) => (
+                          <tr key={cat}>
+                            <td>{cat}</td>
+                            <td className="score-current">
+                              {formatScore(sub.current?.[cat])}
+                            </td>
+                            <td className="score-projected">
+                              {formatScore(sub.projected?.[cat])}
+                            </td>
+                            <td className="score-supervisor">
+                              {formatScore(sub.supervisorAssessment?.[cat])}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
                 <div className="pagination-controls">
                   <button
                     onClick={() => paginate(currentPage - 1)}
@@ -608,9 +620,21 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                   <td>{formatDate(sub.submittedAt)}</td>
                   <td>{sub.approvedBy || "-"}</td>
                   <td>{formatDate(sub.approvedAt)}</td>
-                  <td>{formatScores(sub.current)}</td>
-                  <td>{formatScores(sub.projected)}</td>
-                  <td>{formatScores(sub.supervisorAssessment)}</td>
+                  <td>
+                    {Object.entries(sub.current || {})
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(", ")}
+                  </td>
+                  <td>
+                    {Object.entries(sub.projected || {})
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(", ")}
+                  </td>
+                  <td>
+                    {Object.entries(sub.supervisorAssessment || {})
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(", ")}
+                  </td>
                 </tr>
               ))}
             </tbody>

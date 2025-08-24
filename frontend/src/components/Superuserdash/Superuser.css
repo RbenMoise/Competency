@@ -35,25 +35,13 @@
   color: #000;
 }
 
-.header-content {
+.dashlink {
   display: flex;
   align-items: center;
-  gap: 2rem;
-}
-
-.summary-stats {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.summary-stats p {
-  margin: 0;
-}
-
-.summary-stats strong {
+  gap: 0.5rem;
+  text-decoration: none;
   color: #000;
+  font-weight: 500;
 }
 
 .modern-profile {
@@ -202,6 +190,33 @@
   font-size: 1rem;
   color: #555;
   margin-bottom: 1rem;
+}
+
+.summary-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.tile {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.tile h4 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+  color: #000;
+}
+
+.tile-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 0.5rem;
 }
 
 .users-table,

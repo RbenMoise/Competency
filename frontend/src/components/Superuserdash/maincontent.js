@@ -13,6 +13,17 @@ export default function MainContent({
       .join(", ");
   };
 
+  const maxBarHeight = 100; // Max height for SVG bars
+  const maxValue =
+    Math.max(
+      summary.totalUsers,
+      summary.employees,
+      summary.supervisors,
+      summary.pending,
+      summary.approved,
+      summary.rejected
+    ) || 1; // Prevent division by zero
+
   return (
     <div className="main-content">
       {activeSection === "overview" && (
@@ -22,25 +33,85 @@ export default function MainContent({
             Welcome to the Super User Dashboard. Manage all users and
             submissions.
           </p>
-          <div className="summary-stats">
-            <p>
-              Total Users: <strong>{summary.totalUsers}</strong>
-            </p>
-            <p>
-              Employees: <strong>{summary.employees}</strong>
-            </p>
-            <p>
-              Supervisors: <strong>{summary.supervisors}</strong>
-            </p>
-            <p>
-              Pending Submissions: <strong>{summary.pending}</strong>
-            </p>
-            <p>
-              Approved Submissions: <strong>{summary.approved}</strong>
-            </p>
-            <p>
-              Rejected Submissions: <strong>{summary.rejected}</strong>
-            </p>
+          <div className="summary-tiles">
+            <div className="tile">
+              <h4>Total Users</h4>
+              <div className="tile-value">{summary.totalUsers}</div>
+              <svg width="50" height="120">
+                <rect
+                  x="10"
+                  y={120 - (summary.totalUsers / maxValue) * maxBarHeight}
+                  width="30"
+                  height={(summary.totalUsers / maxValue) * maxBarHeight}
+                  fill="#007bff"
+                />
+              </svg>
+            </div>
+            <div className="tile">
+              <h4>Employees</h4>
+              <div className="tile-value">{summary.employees}</div>
+              <svg width="50" height="120">
+                <rect
+                  x="10"
+                  y={120 - (summary.employees / maxValue) * maxBarHeight}
+                  width="30"
+                  height={(summary.employees / maxValue) * maxBarHeight}
+                  fill="#17a2b8"
+                />
+              </svg>
+            </div>
+            <div className="tile">
+              <h4>Supervisors</h4>
+              <div className="tile-value">{summary.supervisors}</div>
+              <svg width="50" height="120">
+                <rect
+                  x="10"
+                  y={120 - (summary.supervisors / maxValue) * maxBarHeight}
+                  width="30"
+                  height={(summary.supervisors / maxValue) * maxBarHeight}
+                  fill="#6f42c1"
+                />
+              </svg>
+            </div>
+            <div className="tile">
+              <h4>Pending</h4>
+              <div className="tile-value">{summary.pending}</div>
+              <svg width="50" height="120">
+                <rect
+                  x="10"
+                  y={120 - (summary.pending / maxValue) * maxBarHeight}
+                  width="30"
+                  height={(summary.pending / maxValue) * maxBarHeight}
+                  fill="#ffc107"
+                />
+              </svg>
+            </div>
+            <div className="tile">
+              <h4>Approved</h4>
+              <div className="tile-value">{summary.approved}</div>
+              <svg width="50" height="120">
+                <rect
+                  x="10"
+                  y={120 - (summary.approved / maxValue) * maxBarHeight}
+                  width="30"
+                  height={(summary.approved / maxValue) * maxBarHeight}
+                  fill="#28a745"
+                />
+              </svg>
+            </div>
+            <div className="tile">
+              <h4>Rejected</h4>
+              <div className="tile-value">{summary.rejected}</div>
+              <svg width="50" height="120">
+                <rect
+                  x="10"
+                  y={120 - (summary.rejected / maxValue) * maxBarHeight}
+                  width="30"
+                  height={(summary.rejected / maxValue) * maxBarHeight}
+                  fill="#dc3545"
+                />
+              </svg>
+            </div>
           </div>
         </div>
       )}

@@ -116,7 +116,7 @@ export default function SuperUserDash() {
 
   return (
     <div className="super-user-container">
-      <Header user={user} summary={summary} />
+      <Header user={user} />
       <div className="dashboard-layout">
         <Sidebar setActiveSection={setActiveSection} />
         <MainContent

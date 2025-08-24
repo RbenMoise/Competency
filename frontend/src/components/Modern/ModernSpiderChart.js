@@ -39,24 +39,19 @@ export default function ModernSpiderChart() {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
-
-
-
-useEffect(() => {
+  useEffect(() => {
     // Check if mobile on initial render and on resize
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    
+    window.addEventListener("resize", checkIfMobile);
+
     return () => {
-      window.removeEventListener('resize', checkIfMobile);
+      window.removeEventListener("resize", checkIfMobile);
     };
   }, []);
-
-
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -135,7 +130,6 @@ useEffect(() => {
     };
 
     fetchUserData();
-
 
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -261,8 +255,7 @@ useEffect(() => {
 
   return (
     <div className="modern-chart-container">
-
-<header className="modern-header">
+      <header className="modern-header">
         {!isMobile && (
           <div className="modern-logo">
             <div className="logo-placeholder">

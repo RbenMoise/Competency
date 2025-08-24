@@ -11,6 +11,7 @@ import SupDash from "./components/SupDash/SupDash";
 import StartUp from "./components/StartUp/StartUp";
 import TeamPerformance from "./components/TeamPerformance/TeamPerformance";
 import { Navigate } from "react-router-dom";
+import SuperUserDash from "./components/Superuserdash/Superuser";
 
 function App() {
   return (
@@ -65,7 +66,8 @@ function App() {
               />
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />{" "}
+          <Route path="/superUser" element={<SuperUserDash />} />
         </Routes>
       </Router>
     </AuthProvider>

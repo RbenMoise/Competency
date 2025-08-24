@@ -318,6 +318,107 @@ export default function MainContent({ activeSection, allUsers, summary }) {
               ))}
             </tbody>
           </table>
+          {showSubmissionsModal && selectedUser && (
+            <div className="submissions-modal">
+              <h3>Submissions for {selectedUser.name}</h3>
+              <div className="user-info">
+                <p>
+                  <strong>Name:</strong> {selectedUser.name || "Unknown"}
+                </p>
+                <p>
+                  <strong>Email:</strong> {selectedUser.email || "-"}
+                </p>
+                <p>
+                  <strong>Position:</strong> {selectedUser.occupation || "-"}
+                </p>
+                <p>
+                  <strong>Role:</strong> {selectedUser.role || "-"}
+                </p>
+              </div>
+              {userSubmissions.length === 0 ? (
+                <div className="empty-state-card">
+                  <div className="empty-state-content">
+                    <div className="empty-icon">🔍</div>
+                    <h3>No Submissions</h3>
+                    <p>This user has no submissions.</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <table className="submissions-table">
+                    <thead>
+                      <tr>
+                        <th>Status</th>
+                        <th>Submitted At</th>
+                        <th>Reviewed By</th>
+                        <th>Reviewed At</th>
+                        <th>Employee Scores</th>
+                        <th>Supervisor Scores</th>
+                        <th>Comments</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {currentSubmissions.map((sub) => (
+                        <tr key={sub._id}>
+                          <td>
+                            <span
+                              className={`status-badge ${
+                                sub.status?.toLowerCase() || "unknown"
+                              }`}
+                            >
+                              {sub.status || "Unknown"}
+                            </span>
+                          </td>
+                          <td>
+                            {sub.submittedAt
+                              ? new Date(sub.submittedAt).toLocaleString()
+                              : "-"}
+                          </td>
+                          <td>{sub.approvedBy || "-"}</td>
+                          <td>
+                            {sub.approvedAt &&
+                            !isNaN(new Date(sub.approvedAt).getTime())
+                              ? new Date(sub.approvedAt).toLocaleDateString()
+                              : "-"}
+                          </td>
+                          <td>{formatScores(sub.current)}</td>
+                          <td>{formatScores(sub.supervisorAssessment)}</td>
+                          <td>{sub.approvalComments || "-"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="pagination-controls">
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="pagination-button"
+                    >
+                      Previous
+                    </button>
+                    <span className="page-info">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="pagination-button"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </>
+              )}
+              <div className="modal-actions">
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowSubmissionsModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       {activeSection === "submissions" && (
@@ -366,109 +467,6 @@ export default function MainContent({ activeSection, allUsers, summary }) {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-      {showSubmissionsModal && selectedUser && (
-        <div className="modal-overlay">
-          <div className="submissions-modal">
-            <h3>Submissions for {selectedUser.name}</h3>
-            <div className="user-info">
-              <p>
-                <strong>Name:</strong> {selectedUser.name || "Unknown"}
-              </p>
-              <p>
-                <strong>Email:</strong> {selectedUser.email || "-"}
-              </p>
-              <p>
-                <strong>Position:</strong> {selectedUser.occupation || "-"}
-              </p>
-              <p>
-                <strong>Role:</strong> {selectedUser.role || "-"}
-              </p>
-            </div>
-            {userSubmissions.length === 0 ? (
-              <div className="empty-state-card">
-                <div className="empty-state-content">
-                  <div className="empty-icon">🔍</div>
-                  <h3>No Submissions</h3>
-                  <p>This user has no submissions.</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                <table className="submissions-table">
-                  <thead>
-                    <tr>
-                      <th>Status</th>
-                      <th>Submitted At</th>
-                      <th>Reviewed By</th>
-                      <th>Reviewed At</th>
-                      <th>Employee Scores</th>
-                      <th>Supervisor Scores</th>
-                      <th>Comments</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentSubmissions.map((sub) => (
-                      <tr key={sub._id}>
-                        <td>
-                          <span
-                            className={`status-badge ${
-                              sub.status?.toLowerCase() || "unknown"
-                            }`}
-                          >
-                            {sub.status || "Unknown"}
-                          </span>
-                        </td>
-                        <td>
-                          {sub.submittedAt
-                            ? new Date(sub.submittedAt).toLocaleString()
-                            : "-"}
-                        </td>
-                        <td>{sub.approvedBy || "-"}</td>
-                        <td>
-                          {sub.approvedAt &&
-                          !isNaN(new Date(sub.approvedAt).getTime())
-                            ? new Date(sub.approvedAt).toLocaleDateString()
-                            : "-"}
-                        </td>
-                        <td>{formatScores(sub.current)}</td>
-                        <td>{formatScores(sub.supervisorAssessment)}</td>
-                        <td>{sub.approvalComments || "-"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <div className="pagination-controls">
-                  <button
-                    onClick={() => paginate(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="pagination-button"
-                  >
-                    Previous
-                  </button>
-                  <span className="page-info">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => paginate(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="pagination-button"
-                  >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
-            <div className="modal-actions">
-              <button
-                className="cancel-btn"
-                onClick={() => setShowSubmissionsModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

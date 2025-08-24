@@ -31,43 +31,67 @@ const PerformanceCharts = ({
   selectedDepartment,
   submissions,
 }) => {
+  // Log props to debug data issues
+  console.log("PerformanceCharts props:", {
+    employeeData,
+    disciplineData,
+    disciplines,
+    submissions,
+    scoreType,
+    analysisMode,
+    chartType,
+  });
+
   const getSpiderChartData = () => {
     if (analysisMode === "employee") {
-      const topEmployees = Object.values(employeeData).slice(0, 3);
+      const topEmployees = Object.values(employeeData || {}).slice(0, 3);
       return disciplines.map((disc) => {
         const dataPoint = { discipline: disc };
         topEmployees.forEach((emp) => {
-          dataPoint[emp.name] =
-            emp.scores[scoreType === "all" ? "current" : scoreType][disc] || 0;
+          dataPoint[emp.name?.split(" ")[0] || "Unknown"] =
+            emp.scores?.[scoreType === "all" ? "current" : scoreType]?.[disc] ||
+            0;
         });
         return dataPoint;
       });
     } else {
       return disciplines.map((disc) => ({
         discipline: disc,
-        Current: disciplineData[disc]?.average.current || 0,
-        Projected: disciplineData[disc]?.average.projected || 0,
-        Supervisor: disciplineData[disc]?.average.supervisor || 0,
+        Current: disciplineData?.[disc]?.average?.current || 0,
+        Projected: disciplineData?.[disc]?.average?.projected || 0,
+        Supervisor: disciplineData?.[disc]?.average?.supervisor || 0,
       }));
     }
   };
 
   const getBarChartData = () => {
+    console.log("getBarChartData inputs:", {
+      employeeData,
+      disciplineData,
+      analysisMode,
+    });
+    let data;
     if (analysisMode === "employee") {
-      return Object.values(employeeData).map((emp) => ({
-        name: emp.name,
-        Current: emp.average.current,
-        Projected: emp.average.projected,
-        Supervisor: emp.average.supervisor,
+      data = Object.values(employeeData || {}).map((emp) => ({
+        name: emp.name?.split(" ")[0] || "Unknown",
+        Current: emp.average?.current || 0,
+        Projected: emp.average?.projected || 0,
+        Supervisor: emp.average?.supervisor || 0,
       }));
     } else {
-      return disciplines.map((disc) => ({
+      data = disciplines.map((disc) => ({
         name: disc,
-        Current: disciplineData[disc]?.average.current || 0,
-        Projected: disciplineData[disc]?.average.projected || 0,
-        Supervisor: disciplineData[disc]?.average.supervisor || 0,
+        Current: disciplineData?.[disc]?.average?.current || 0,
+        Projected: disciplineData?.[disc]?.average?.projected || 0,
+        Supervisor: disciplineData?.[disc]?.average?.supervisor || 0,
       }));
     }
+    // Fallback data if empty
+    if (!data.length) {
+      data = [{ name: "No Data", Current: 0, Projected: 0, Supervisor: 0 }];
+    }
+    console.log("BarChart data:", data);
+    return data;
   };
 
   const getStackedBarChartData = () => {
@@ -76,14 +100,14 @@ const PerformanceCharts = ({
 
   const getLineChartData = () => {
     const employeeSubmissions = submissions.reduce((acc, sub) => {
-      const key = sub.submitter.name;
+      const key = sub.submitter?.name || "Unknown";
       if (!acc[key]) acc[key] = [];
       acc[key].push(sub);
       return acc;
     }, {});
 
     if (analysisMode === "employee") {
-      const topEmployees = Object.values(employeeData).slice(0, 3);
+      const topEmployees = Object.values(employeeData || {}).slice(0, 3);
       const dates = [
         ...new Set(
           submissions.map(
@@ -97,7 +121,7 @@ const PerformanceCharts = ({
           const sub = employeeSubmissions[emp.name]?.find(
             (s) => new Date(s.submittedAt).toISOString().split("T")[0] === date
           );
-          dataPoint[emp.name] = sub
+          dataPoint[emp.name?.split(" ")[0] || "Unknown"] = sub
             ? calculateAverage(sub[scoreType === "all" ? "current" : scoreType])
             : 0;
         });
@@ -139,47 +163,68 @@ const PerformanceCharts = ({
   };
 
   const getBoxPlotData = () => {
-    const rawData =
-      analysisMode === "employee"
-        ? Object.values(employeeData).map((emp) => ({
-            label: emp.name,
-            data: Object.values(
-              emp.scores[scoreType === "all" ? "current" : scoreType]
-            )
-              .map(Number)
-              .filter((score) => !isNaN(score) && score > 0),
-          }))
-        : disciplines.map((disc) => ({
-            label: disc,
-            data: submissions
-              .map(
-                (sub) =>
-                  Number(
-                    sub[scoreType === "all" ? "current" : scoreType]?.[disc]
-                  ) || 0
-              )
-              .filter((score) => score > 0),
-          }));
-
-    return rawData.map(({ label, data }) => {
-      if (!data.length)
-        return { label, min: 0, q1: 0, median: 0, q3: 0, max: 0 };
+    console.log("getBoxPlotData inputs:", {
+      employeeData,
+      submissions,
+      analysisMode,
+      scoreType,
+    });
+    let data;
+    if (analysisMode === "employee") {
+      data = Object.values(employeeData || {}).map((emp) => ({
+        label: emp.name?.split(" ")[0] || "Unknown",
+        data: Object.values(
+          emp.scores?.[scoreType === "all" ? "current" : scoreType] || {}
+        )
+          .map(Number)
+          .filter((score) => !isNaN(score) && score > 0),
+      }));
+    } else {
+      data = disciplines.map((disc) => ({
+        label: disc,
+        data: submissions
+          .map(
+            (sub) =>
+              Number(
+                sub[scoreType === "all" ? "current" : scoreType]?.[disc]
+              ) || 0
+          )
+          .filter((score) => score > 0),
+      }));
+    }
+    // Compute quartiles for Recharts Box Plot
+    const boxPlotData = data.map(({ label, data }) => {
+      if (!data.length) {
+        return { label, min: 0, q1: 0, median: 0, q3: 0, max: 0, outliers: [] };
+      }
       const sorted = data.sort((a, b) => a - b);
       const min = Math.min(...sorted);
       const max = Math.max(...sorted);
       const median = sorted[Math.floor(sorted.length / 2)];
       const q1 = sorted[Math.floor(sorted.length / 4)];
       const q3 = sorted[Math.floor((3 * sorted.length) / 4)];
-      return {
-        label,
-        min,
-        q1,
-        median,
-        q3,
-        max,
-        outliers: sorted.filter((v) => v < min || v > max),
-      };
+      const iqr = q3 - q1;
+      const outlierThresholdLow = q1 - 1.5 * iqr;
+      const outlierThresholdHigh = q3 + 1.5 * iqr;
+      const outliers = sorted.filter(
+        (v) => v < outlierThresholdLow || v > outlierThresholdHigh
+      );
+      return { label, min, q1, median, q3, max, outliers };
     });
+    // Fallback if empty
+    if (!boxPlotData.length || boxPlotData.every((d) => !d.data?.length)) {
+      boxPlotData.push({
+        label: "No Data",
+        min: 0,
+        q1: 0,
+        median: 0,
+        q3: 0,
+        max: 0,
+        outliers: [],
+      });
+    }
+    console.log("BoxPlot data:", boxPlotData);
+    return boxPlotData;
   };
 
   const calculateAverage = (scores) => {
@@ -196,15 +241,18 @@ const PerformanceCharts = ({
     const data = getSpiderChartData();
     const series =
       analysisMode === "employee"
-        ? Object.values(employeeData)
+        ? Object.values(employeeData || {})
             .slice(0, 3)
-            .map((emp) => emp.name)
+            .map((emp) => emp.name?.split(" ")[0] || "Unknown")
         : ["Current", "Projected", "Supervisor"];
     return (
       <ResponsiveContainer width="100%" height={400}>
         <RadarChart data={data}>
           <PolarGrid />
-          <PolarAngleAxis dataKey="discipline" />
+          <PolarAngleAxis
+            dataKey="discipline"
+            tick={{ angle: -90, textAnchor: "end", dy: -5 }}
+          />
           <PolarRadiusAxis domain={[0, 5]} />
           {series.map((key, index) => (
             <Radar
@@ -228,7 +276,13 @@ const PerformanceCharts = ({
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis
+            dataKey="name"
+            angle={-90}
+            textAnchor="end"
+            interval={0}
+            height={100}
+          />
           <YAxis domain={[0, 5]} />
           <Tooltip />
           <Legend />
@@ -261,7 +315,13 @@ const PerformanceCharts = ({
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
+          <XAxis
+            dataKey="name"
+            angle={-90}
+            textAnchor="end"
+            interval={0}
+            height={100}
+          />
           <YAxis domain={[0, 15]} />
           <Tooltip />
           <Legend />
@@ -277,15 +337,21 @@ const PerformanceCharts = ({
     const data = getLineChartData();
     const series =
       analysisMode === "employee"
-        ? Object.values(employeeData)
+        ? Object.values(employeeData || {})
             .slice(0, 3)
-            .map((emp) => emp.name)
+            .map((emp) => emp.name?.split(" ")[0] || "Unknown")
         : disciplines.slice(0, 3);
     return (
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
+          <XAxis
+            dataKey="date"
+            angle={-90}
+            textAnchor="end"
+            interval={0}
+            height={100}
+          />
           <YAxis domain={[0, 5]} />
           <Tooltip />
           <Legend />
@@ -302,7 +368,8 @@ const PerformanceCharts = ({
     );
   };
 
-  const BoxPlotChart = ({ data, scoreType, analysisMode }) => {
+  const BoxPlotChart = ({ data, scoreType }) => {
+    console.log("BoxPlotChart data:", data);
     const CustomBoxPlot = (props) => {
       const { x, y, payload } = props;
       if (
@@ -382,7 +449,13 @@ const PerformanceCharts = ({
       <ResponsiveContainer width="100%" height={400}>
         <ScatterChart>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="label" type="category" />
+          <XAxis
+            dataKey="label"
+            angle={-90}
+            textAnchor="end"
+            interval={0}
+            height={100}
+          />
           <YAxis domain={[0, 5]} />
           <Tooltip />
           <Legend
@@ -418,11 +491,7 @@ const PerformanceCharts = ({
       {chartType === "stackedBar" && renderStackedBarChart()}
       {chartType === "line" && renderLineChart()}
       {chartType === "box" && (
-        <BoxPlotChart
-          data={getBoxPlotData()}
-          scoreType={scoreType}
-          analysisMode={analysisMode}
-        />
+        <BoxPlotChart data={getBoxPlotData()} scoreType={scoreType} />
       )}
     </div>
   );

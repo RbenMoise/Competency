@@ -389,7 +389,7 @@ export default function MainContent({ activeSection, allUsers, summary }) {
                         <td>{sub.approvedBy || "-"}</td>
                         <td>
                           {sub.approvedAt &&
-                          !isNaN(new Date(sub.appliedAt).getTime())
+                          !isNaN(new Date(sub.approvedAt).getTime())
                             ? new Date(sub.approvedAt).toLocaleDateString()
                             : "-"}
                         </td>

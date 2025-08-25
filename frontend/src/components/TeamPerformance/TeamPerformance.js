@@ -26,39 +26,13 @@ export default function TeamPerformance() {
   const navigate = useNavigate();
 
   const departments = {
-    All: "General Performance",
-    Geophysics: [
-      "geophysicist",
-      "geophysicist ",
-      "senior geophysicist",
-      "junior geophysicist",
-    ],
-    Geology: [
-      "geologist",
-      "geologist ",
-      "senior geologist",
-      "junior geologist",
-    ],
-    Geochemistry: [
-      "geochemist",
-      "geochemist ",
-      "senior geochemist",
-      "junior geochemist",
-    ],
-    "Data Science": [
-      "data scientist",
-      "data scientist ",
-      "senior data scientist",
-      "data analyst",
-    ],
-    "Petroleum Engineering": [
-      "petroleum engineer",
-      "petroleum engineer ",
-      "reservoir engineer",
-      "drilling engineer",
-    ],
+    "All": "General Performance",
+    "Geophysics": ["geophysicist","geophysicist ",  "senior geophysicist","petro technician", "junior geophysicist", "intern (geophycist)"],
+    "Geology": ["geologist","geologist ", "senior geologist","geoscience technologist (geology)", "junior geologist"],
+    "Geochemistry": ["geochemist","geochemist ", "senior geochemist","geochemical laboratory technician","palynologist", "junior geochemist", "intern (geochemistry)"],
+    "Data Science": ["data scientist","data scientist ", "gis technician","gis data analyst", "senior data scientist", "data analyst"],
+    "Petroleum Engineering": ["petroleum engineer","petroleum engineer ", "reservoir engineer","facilities engineer","geoscience technologist (petroleum)", "drilling engineer"]
   };
-
   const chartTypes = [
     { value: "spider", label: "Spider Chart" },
     { value: "bar", label: "Bar Chart" },
@@ -466,6 +440,9 @@ export default function TeamPerformance() {
       ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`
       : nameParts[0][0];
 
+          const isSuperUser = user.name === "qwe";
+
+
   return (
     <div className="team-performance-container">
       <header className="modern-header">
@@ -510,6 +487,12 @@ export default function TeamPerformance() {
           </div>
           <div className={`dropdown-menu ${isDropdownOpen ? "open" : ""}`}>
             <div className="dropdown-divider"></div>
+            {isSuperUser && (
+                        <Link to="/superUser"  className="dropdown-item">
+                         
+                            Super User Panel
+                        </Link>
+                      )}
             <Link to="/logout" className="dropdown-item logout">
               Log Out
             </Link>

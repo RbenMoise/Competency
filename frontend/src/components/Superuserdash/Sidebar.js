@@ -5,30 +5,30 @@ import "./MainContent.css";
 
 export default function Sidebar({ setActiveSection }) {
   return (
-    <div className="sidebar">
+    <div className="ssidebar">
       <h3>Super User Menu</h3>
       <button
-        className="sidebar-button"
+        className="ssidebar-button"
         onClick={() => setActiveSection("overview")}
       >
         Overview
       </button>
-      <div className="sidebar-section">
+      <div className="ssidebar-section">
         <button
-          className="sidebar-button"
+          className="ssidebar-button"
           onClick={() => setActiveSection("users")}
         >
           All Users
         </button>
-        <div className="sidebar-subsection">
+        <div className="ssidebar-subsection">
           <button
-            className="sidebar-subbutton"
+            className="ssidebar-subbutton"
             onClick={() => setActiveSection("supervisors")}
           >
             Supervisors
           </button>
           <button
-            className="sidebar-subbutton"
+            className="ssidebar-subbutton"
             onClick={() => setActiveSection("employees")}
           >
             Employees
@@ -36,16 +36,16 @@ export default function Sidebar({ setActiveSection }) {
         </div>
       </div>
       <button
-        className="sidebar-button"
+        className="ssidebar-button"
         onClick={() => setActiveSection("submissions")}
       >
         All Submissions
       </button>
       <Link to="/employeeAssessments">
-        <button className="sidebar-button">Manage Employee Assessments</button>
+        <button className="ssidebar-button">Manage Employee Assessments</button>
       </Link>
       <Link to="/teamPerformance">
-        <button className="sidebar-button">View Team Performance</button>
+        <button className="ssidebar-button">View Team Performance</button>
       </Link>
     </div>
   );

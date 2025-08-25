@@ -260,6 +260,9 @@ export default function EmployeeAssessments() {
       ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`
       : nameParts[0][0];
 
+
+        const isSuperUser = user.name === "qwe";
+
   return (
     <div className="assessments-container">
       <header className="modern-header">
@@ -286,6 +289,12 @@ export default function EmployeeAssessments() {
           </div>
           <div className={`dropdown-menu ${isDropdownOpen ? "open" : ""}`}>
             <div className="dropdown-divider"></div>
+            {isSuperUser && (
+                        <Link to="/superUser"  className="dropdown-item">
+                         
+                            Super User Panel
+                        </Link>
+                      )}
             <Link to="/logout" className="dropdown-item logout">
               Log Out
             </Link>
@@ -303,14 +312,14 @@ export default function EmployeeAssessments() {
         </div>
       </div>
       <div className="assessments-content">
-        <div className="action-card">
+        {/* <div className="action-card">
           <Link to="/teamPerformance">
             <button className="view-all-btn">
               View Team Performance
               <span className="arrow-icon">→</span>
             </button>
           </Link>
-        </div>
+        </div> */}
         <div className="filter-tabs">
           <div
             className={`tab ${filter === "All" ? "active" : ""}`}

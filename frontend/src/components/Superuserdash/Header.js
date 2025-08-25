@@ -27,60 +27,47 @@ export default function Header({ user }) {
       : nameParts[0][0];
 
   return (
-    <header className="modern-header">
-      <div className="modern-logo">
-        <div className="logo-placeholder">
-          <img className="logo-icon" src={LOGO} alt="logo" />
-          <span className="logo-text">Energizing Kenya</span>
+    <header className="mmodern-header">
+      <div className="mmodern-logo">
+        <div className="llogo-placeholder">
+          <img className="llogo-icon" src={LOGO} alt="logo" />
+          <span className="llogo-text">Upstream</span>
         </div>
       </div>
-      <Link className="dashlink" to="/supDash">
+      <Link className="ddashlink" to="/supDash">
         <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect x="3" y="3" width="8" height="8" rx="1" fill="#0c0c0c" />
-          <rect
-            x="3"
-            y="13"
-            width="8"
-            height="8"
-            rx="1"
-            fill="#0c0c0c"
-            opacity="0.8"
-          />
-          <rect x="13" y="3" width="8" height="8" rx="1" fill="#0c0c0c" />
-          <rect
-            x="13"
-            y="13"
-            width="8"
-            height="8"
-            rx="1"
-            fill="#0c0c0c"
-            opacity="0.8"
-          />
-          <path d="M12 3V21" stroke="#e0e0e0" strokeWidth="1.5" />
-          <path d="M3 12H21" stroke="#e0e0e0" strokeWidth="1.5" />
-        </svg>
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect x="2" y="2" width="8" height="8" rx="2" fill="#000000" />
+            <rect x="14" y="14" width="8" height="8" rx="2" fill="#000000" />
+            <path
+              d="M12 6V12M12 12V18M12 12H18M12 12H6"
+              stroke="#000000"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         Dashboard
       </Link>
-      <div className="modern-profile" ref={dropdownRef}>
-        <div className="profile-container" onClick={toggleDropdown}>
-          <div className="profile-avatar">{initials}</div>
-          <div className="profile-info">
+      <div className="mmodern-profile" ref={dropdownRef}>
+        <div className="pprofile-container" onClick={toggleDropdown}>
+          <div className="pprofile-avatar">{initials}</div>
+          <div className="pprofile-info">
             <h3>{user.name}</h3>
             <p>{user.occupation}</p>
           </div>
-          <div className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`}>
+          <div className={`ddropdown-arrow ${isDropdownOpen ? "open" : ""}`}>
             ▼
           </div>
         </div>
-        <div className={`dropdown-menu ${isDropdownOpen ? "open" : ""}`}>
-          <div className="dropdown-divider"></div>
-          <Link to="/logout" className="dropdown-item logout">
+        <div className={`ddropdown-menu ${isDropdownOpen ? "open" : ""}`}>
+          <div className="ddropdown-divider"></div>
+          <Link to="/logout" className="ddropdown-item logout">
             Log Out
           </Link>
         </div>

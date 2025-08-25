@@ -173,6 +173,9 @@ export default function SupDash() {
       ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`
       : nameParts[0][0];
 
+  // Check if current user is the super user
+  const isSuperUser = user.name === "qwe";
+
   const pendingReviews = submissions
     .filter((sub) => sub.status === "pending")
     .slice(0, 3);
@@ -232,6 +235,12 @@ export default function SupDash() {
             </div>
             <div className={`dropdown-menu ${isDropdownOpen ? "open" : ""}`}>
               <div className="dropdown-divider"></div>
+               {isSuperUser && (
+            <Link to="/superUser"  className="dropdown-item">
+             
+                Super User Panel
+            </Link>
+          )}
               <Link
                 to="/logout"
                 onClick={handleLogout}

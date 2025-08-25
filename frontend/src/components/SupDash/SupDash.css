@@ -288,6 +288,25 @@
   box-shadow: 0 4px 8px rgba(156, 202, 13, 0.3);
 }
 
+
+.super-user-button{
+  background-color: #e2483a;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.super-user-button:hover{
+  background-color: #d2483a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(156, 202, 13, 0.3);
+}
+
 /* Reviews Section */
 .reviews-section {
   display: grid;

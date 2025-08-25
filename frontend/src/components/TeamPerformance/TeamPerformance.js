@@ -440,7 +440,7 @@ export default function TeamPerformance() {
       ? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`
       : nameParts[0][0];
 
-          const isSuperUser = user.name === "qwe";
+          const isSuperUser = user.name === "Paul Wanjau";
 
 
   return (

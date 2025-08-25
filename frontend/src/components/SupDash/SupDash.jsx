@@ -174,7 +174,7 @@ export default function SupDash() {
       : nameParts[0][0];
 
   // Check if current user is the super user
-  const isSuperUser = user.name === "qwe";
+  const isSuperUser = user.name === "Paul Wanjau";
 
   const pendingReviews = submissions
     .filter((sub) => sub.status === "pending")

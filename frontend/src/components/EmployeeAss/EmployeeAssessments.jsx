@@ -261,7 +261,7 @@ export default function EmployeeAssessments() {
       : nameParts[0][0];
 
 
-        const isSuperUser = user.name === "qwe";
+        const isSuperUser = user.name === "Paul Wanjau";
 
   return (
     <div className="assessments-container">
